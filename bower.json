@@ -1,0 +1,32 @@
+{
+  "name": "react-duallistbox",
+  "description": "a dual list box for selecting and moving data using react",
+  "main": "index.js",
+  "authors": [
+    "killyosaur"
+  ],
+  "license": "CC-BY-SA-4.0",
+  "keywords": [
+    "react",
+    "node",
+    "dual",
+    "list",
+    "box"
+  ],
+  "moduleType": [
+    "es6",
+    "node"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "react": "~0.14.6",
+    "bootstrap": "~3.3.6"
+  }
+}
