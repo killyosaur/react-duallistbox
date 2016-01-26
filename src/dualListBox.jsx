@@ -1,3 +1,6 @@
+var React = require('react');
+var PropTypes = require('ReactPropTypes');
+
 function removeData(destinationData, dataToRemove, options) {
     var dataToReturn = [];
     for (var x = 0; x < destinationData.length; x++) {
@@ -46,6 +49,21 @@ function setOptions(optionState, props) {
 
 var DualListBox = React.createClass({
     displayName: 'DualListBox',
+    propTypes: {
+        text: PropTypes.string,
+        value: PropTypes.string,
+        sourceTitle: PropTypes.string,
+        destinationTitle: PropTypes.string,
+        timeout: PropTypes.number,
+        textLength: PropTypes.number,
+        moveAllBtn: PropTypes.bool,
+        maxAllBtn: PropTypes.number,
+        warning: PropTypes.string,
+        sortBy: PropTypes.string,
+        source: PropTypes.arrayOf(PropTypes.object).isRequired,
+        destination: PropTypes.arrayOf(PropTypes.object).isRequired,
+        onChange: PropTypes.func
+    },
     getInitialState: function() {
         return {
             sourceData: [],
@@ -60,6 +78,7 @@ var DualListBox = React.createClass({
                 moveAllBtn: true,                   // Whether the append all button is available.
                 maxAllBtn: 500,                     // Maximum size of list in which the all button works without warning. See below.
                 height: '300px',
+                sortBy: 'name',
                 warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
             }
         };
@@ -75,17 +94,37 @@ var DualListBox = React.createClass({
             options: options
         });
     },
-    moveLeft: function() {
-        
+    compare: function(a, b) {
+        if (a[this.state.options.sortBy] > b[this.state.options.sortBy]) {
+            return 1;
+        }
+        if (a[this.state.options.sortBy] < b[this.state.options.sortBy]) {
+            return -1;
+        }
+        return 0;
     },
-    moveAllLeft: function() {
-        
+    moveLeft: function(itemsToMove) {
+        var destination = removeData(this.state.destinationData, itemsToMove, this.state.options);
+        this.setState({
+            sourceData: this.state.sourceData.concat(itemsToMove).sort(this.compare),
+            destinationData: destination
+        });
+
+        if(this.props.onChange) {
+            this.props.onChange(destination);
+        }
     },
-    moveRight: function() {
-        
-    },
-    moveAllRight: function() {
-        
+    moveRight: function(itemsToMove) {
+        var source = removeData(this.state.sourceData, itemsToMove, this.state.options);
+        var destination = this.state.destinationData.concat(itemsToMove).sort(this.compare);
+        this.setState({
+            sourceData: source,
+            destinationData: destination
+        });
+
+        if(this.props.onChange) {
+            this.props.onChange(destination);
+        }
     },
     itemsMoved: function() {
         
@@ -98,7 +137,6 @@ var DualListBox = React.createClass({
                     source={this.state.sourceData}
                     moveAll={this.state.options.moveAllBtn}
                     onMove={this.moveRight}
-                    onMoveAll={this.moveAllRight}
                     textLength={this.state.options.textLength}
                     onChange={this.itemsMoved}
                     text={this.state.options.text}
@@ -111,7 +149,6 @@ var DualListBox = React.createClass({
                     source={this.state.destinationData}
                     moveAll={this.state.options.moveAllBtn}
                     onMove={this.moveLeft}
-                    onMoveAll={this.moveAllLeft}
                     textLength={this.state.options.textLength}
                     onChange={this.itemsMoved}
                     text={this.state.options.text}

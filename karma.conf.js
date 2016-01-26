@@ -1,5 +1,6 @@
 // Karma configuration
 // Generated on Mon Jan 25 2016 18:12:38 GMT-0500 (Eastern Standard Time)
+var webpack = require('webpack');
 
 module.exports = function(config) {
   config.set({
@@ -12,13 +13,22 @@ module.exports = function(config) {
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
     frameworks: ['jasmine'],
 
+    plugins: [
+        'karma-chrome-loader',
+        'karma-phantomjs-loader',
+        'karma-jasmine',
+        'karma-sourcemap-loader',
+        'karma-webpack',
+        'karma-coverage'
+    ],
 
     // list of files / patterns to load in the browser
     files: [
-      'bower_components/react/react-with-addons.js',
-      'bower_components/react/react-dom.js',
-      {pattern: 'src/**/*.js', included: false},
-      {pattern: 'tests/', included: false}
+      //'bower_components/react/react-with-addons.js',
+      //'bower_components/react/react-dom.js',
+      //{pattern: 'src/**/*.js', included: false},
+      //{pattern: 'tests/', included: false}
+      'tests.webpack.js'
     ],
 
 
@@ -30,7 +40,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'src/**/*.js': ['coverage']
+        'tests.webpack.js': ['webpack']
     },
 
 
@@ -75,6 +85,25 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+    
+    webpack: {
+        module: {
+            loaders: [
+                { test: /\.jsx?$/, loader: 'babel-loader' }
+            ],
+            postLoaders:[
+                {
+                    test: /\.js$/,
+                    exclude: /(tests|node_modules|bower_components)/,
+                    loader: 'istanbul-instrumenter'
+                }
+            ]
+        },
+        watch: true
+    },
+    webpackServer: {
+        noInfo: true
+    }
   })
 }

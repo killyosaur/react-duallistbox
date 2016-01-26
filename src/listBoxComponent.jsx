@@ -1,8 +1,19 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
+var PropTypes = require('ReactPropTypes');
 
 var ListBox = React.createClass({
     displayName: 'ListBox',
+    propTypes: {
+        title: PropTypes.string.isRequired,
+        source: PropTypes.arrayOf(PropTypes.object).isRequired,
+        moveAll: PropTypes.bool.isRequired,
+        onMove: PropTypes.func.isRequired,
+        textLength: PropTypes.number,
+        onChange: PropTypes.func.isRequired,
+        text: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
+        direction: PropTypes.string.isRequired
+    },
     getInitialState: function(){
         return {
             selected: [],
@@ -11,10 +22,17 @@ var ListBox = React.createClass({
         };
     },
     onClickAll: function(event) {
-        
+        this.props.onMove(this.state.moveAllItems);
+        this.setState({
+            selected: [],
+            moveAllItems: []
+        });
     },
     onClick: function(event) {
-        
+        this.props.onMove(this.state.selected);
+        this.setState({
+            selected: []
+        });
     },
     handleFilterChange: function(event) {
         this.setState({
@@ -78,7 +96,7 @@ var ListBox = React.createClass({
             return this.props.source;
         }
         var filter = this.state.filter;
-        var result = this.props.source.filter(v => v.indexOf(filter) > -1);
+        var result = this.props.source.filter(function(v) { return v.indexOf(filter) > -1; });
         this.setState({
            moveAllItems: result 
         });
@@ -91,7 +109,7 @@ var ListBox = React.createClass({
                 return (
                     <option value={item[this.props.value]}>
                         {
-                            text.length > this.props.textLength ?
+                             this.props.textLength > 0 && text.length > this.props.textLength ?
                                 text.substring(0, this.props.textLength - 3) + '...' :
                                 text
                         }
@@ -107,9 +125,8 @@ var ListBox = React.createClass({
                        type="text" placeholder="Filter" onChange={this.handleFilterChange} />
                 {this.buttons()}
                 <select
-                    style={width: '100%', height: this.props.height}
+                    style={width: '100%', height: this.props.height || '200px'}
                     multiple="multiple"
-                    height={this.props.height}
                     onChange={this.handleSelectChange}>
                     {items}
                 </select>
