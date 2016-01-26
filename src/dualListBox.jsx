@@ -59,6 +59,7 @@ var DualListBox = React.createClass({
                 textLength: 45,                     // Maximum text length that is displayed in the select.
                 moveAllBtn: true,                   // Whether the append all button is available.
                 maxAllBtn: 500,                     // Maximum size of list in which the all button works without warning. See below.
+                height: '300px',
                 warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
             }
         };
@@ -102,6 +103,8 @@ var DualListBox = React.createClass({
                     onChange={this.itemsMoved}
                     text={this.state.options.text}
                     value={this.state.options.value}
+                    disable={this.props.disable}
+                    height={this.state.options.height}
                     direction="right" />
                 <ListBox
                     title={this.state.options.destinationTitle}
@@ -113,6 +116,8 @@ var DualListBox = React.createClass({
                     onChange={this.itemsMoved}
                     text={this.state.options.text}
                     value={this.state.options.value}
+                    disable={this.props.disable}
+                    height={this.state.options.height}
                     direction="left" />
             </div>
         );
