@@ -1,5 +1,7 @@
 var React = require('react');
-var PropTypes = require('ReactPropTypes');
+var PropTypes = React.PropTypes;
+var ButtonComponent = require('button');
+var ButtonAllComponent = require('buttonAll');
 
 var ListBox = React.createClass({
     displayName: 'ListBox',
