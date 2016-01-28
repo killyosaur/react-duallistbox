@@ -4,11 +4,11 @@ var path = require('path'),
 module.exports = {
     entry: './src/duallistbox.jsx',
     output: {
-        filename: 'dist/react-duallistbox.js'
+        filename: './dist/react-duallistbox.js'
     },
     module: {
-        loader: [
-            { test: /\.jsx?$/, loader: 'jsx-loader' }
+        loaders: [
+            { test: /\.jsx$/, loader: 'jsx', exclude: /(node_modules|bower_components)/ }
         ]
     },
     plugins: [

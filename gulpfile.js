@@ -1,5 +1,5 @@
 var gulp = require('gulp');
-var $ = require('gulp-load-plugins');
+var $ = require('gulp-load-plugins')();
 var del = require('del');
 var browserSync = require('browser-sync');
 var pkg = require('./package.json');
@@ -33,25 +33,24 @@ gulp.task('script', function () {
 function _buildTask(watch) {
     var webpack = $.webpackBuild;
     return gulp.src(webpack.config.CONFIG_FILENAME)
-        .pipe(watch ? webpack.watch(_after) : webpack.compile(_after))
-        .pipe(gulp.dest('dist/'));
+        .pipe(watch ? webpack.watch(_after) : webpack.run(_after));
 }
 
 function _after(err, stats) {
     if (err) {
-        $.gutil.beep();
+        $.util.beep();
         _logErrors([err]);
     } else if (stats.compilation.errors.length > 0) {
-        $.gutil.beep();
+        $.util.beep();
         _logErrors(stats.compilation.errors);
     } else {
-        $.gutil.log('Scripts recompiled, Time elapsed: ' +
+        $.util.log('Scripts recompiled, Time elapsed: ' +
             moment.duration(stats.endTime - stats.startTime).asSeconds() + 's');
     }
 }
 
 function _logErrors(errors) {
     for (var i = 0; i < errors.length; i++) {
-        $.gutil.log($.gutil.colors.red(errors[i]));
+        $.util.log($.util.colors.red(errors[i]));
     }
 }

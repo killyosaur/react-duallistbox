@@ -1,5 +1,6 @@
 var ButtonComponent = React.createClass({
     displayName: 'ButtonComponent',
+    getClasses: function() {
         return this.props.moveAll ? 'col-md-6' : 'col-md-12';
     },
     render: function() {
@@ -12,3 +13,5 @@ var ButtonComponent = React.createClass({
         );
     }
 });
+
+module.export = ButtonComponent;

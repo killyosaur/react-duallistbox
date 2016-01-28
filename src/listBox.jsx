@@ -1,7 +1,6 @@
-var React = require('react');
 var PropTypes = React.PropTypes;
-var ButtonComponent = require('button');
-var ButtonAllComponent = require('buttonAll');
+var ButtonComponent = require('./button.jsx');
+var ButtonAllComponent = require('./buttonAll.jsx');
 
 var ListBox = React.createClass({
     displayName: 'ListBox',
@@ -42,8 +41,8 @@ var ListBox = React.createClass({
         });
     },
     handleSelectChange: function(event) {
-        let selectedValues = [];
-        for (let i = 0; l = event.target.options.length; i < l; i++){
+        var selectedValues = [];
+        for (var i = 0, l = event.target.options.length; i < l; i++) {
             if (event.target.options[i].selected) {
                 selectedValues.push(event.target.options[i]);
             }
@@ -127,7 +126,7 @@ var ListBox = React.createClass({
                        type="text" placeholder="Filter" onChange={this.handleFilterChange} />
                 {this.buttons()}
                 <select
-                    style={width: '100%', height: this.props.height || '200px'}
+                    style={"width: '100%'; height: " + (this.props.height || '200px')}
                     multiple="multiple"
                     onChange={this.handleSelectChange}>
                     {items}
@@ -135,4 +134,6 @@ var ListBox = React.createClass({
             </div>
         );
     }
-})
+});
+
+module.export = ListBox;

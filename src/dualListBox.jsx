@@ -1,6 +1,5 @@
-var React = require('react');
 var PropTypes = React.ReactPropTypes;
-var ListBox = require('listBox')
+var ListBox = require('./listBox.jsx');
 
 function removeData(destinationData, dataToRemove, options) {
     var dataToReturn = [];
@@ -130,7 +129,7 @@ module.exports = React.createClass({
     itemsMoved: function() {
         
     },
-    render: function(
+    render: function() {
         return (
             <div className="form-group row">
                 <ListBox 
@@ -159,5 +158,5 @@ module.exports = React.createClass({
                     direction="left" />
             </div>
         );
-    )
+    }
 });
