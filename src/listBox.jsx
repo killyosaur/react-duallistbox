@@ -19,14 +19,14 @@ var ListBox = React.createClass({
         return {
             selected: [],
             filter: '',
-            moveAllItems: []
+            filteredData: []
         };
     },
     onClickAll: function(event) {
-        this.props.onMove(this.state.moveAllItems);
+        this.props.onMove(this.state.filteredData);
         this.setState({
             selected: [],
-            moveAllItems: []
+            filteredData: []
         });
     },
     onClick: function(event) {
@@ -36,8 +36,10 @@ var ListBox = React.createClass({
         });
     },
     handleFilterChange: function(event) {
+        var result = this.filteredData(event.target.value);
         this.setState({
-            filter: event.target.value
+            filter: event.target.value,
+            filteredData: result
         });
     },
     handleSelectChange: function(event) {
@@ -54,61 +56,62 @@ var ListBox = React.createClass({
     disabled: function(sourceLength) {
         return this.props.disable || sourceLength === 0;
     },
-    buttons: function(){
+    buttons: function() {
         var btnNodes = [];
-        var btn = function() {
+        var btn = function(thisArg) {
             return (
                 <ButtonComponent
-                    moveAll={this.props.moveAll}
-                    click={this.onClick}
-                    directiosn={this.props.direction}
-                    disable={this.disabled(this.state.selected.length)} />
+                    key={'s-' + thisArg.props.direction}
+                    moveAll={thisArg.props.moveAll}
+                    click={thisArg.onClick}
+                    direction={thisArg.props.direction}
+                    disable={thisArg.disabled(thisArg.state.selected.length)} />
             );
         }
 
-        var btnAll = function() {
+        var btnAll = function(thisArg) {
             return (
                 <ButtonAllComponent
-                    click={this.onClickAll}
-                    direction={this.props.direction}
-                    disable={this.disable(this.state.moveAllItems.length)} />
+                    key={'a-' + thisArg.props.direction}
+                    click={thisArg.onClickAll}
+                    direction={thisArg.props.direction}
+                    disable={thisArg.disabled(thisArg.state.filteredData.length)} />
             );
         }
 
         switch(this.props.direction.toLowerCase()) {
             case 'right':
-                if (this.props.moveAll) {
-                    btnNodes.push(btnAll());
+                if (this.props.moveAll === true) {
+                    btnNodes.push(btnAll(this));
                 }
-                btnNodes.push(btn());
+                btnNodes.push(btn(this));
                 break;
             case 'left':
-                btnNodes.push(btn());
-                if (this.props.moveAll) {
-                    btnNodes.push(btnAll());
+                btnNodes.push(btn(this));
+                if (this.props.moveAll === true) {
+                    btnNodes.push(btnAll(this));
                 }
                 break;
         }
 
         return btnNodes;
     },
-    filteredData: function() {
-        if(filter === '') {
+    filteredData: function(filter) {
+        if (filter === '' || filter === undefined) {
             return this.props.source;
         }
-        var filter = this.state.filter;
-        var result = this.props.source.filter(function(v) { return v.indexOf(filter) > -1; });
-        this.setState({
-           moveAllItems: result 
-        });
+
+        var result = this.props.source.filter(function(v) { return v[this.props.text].indexOf(filter) > -1; }, this);
         return result;
     },
     render: function () {
-        var items = this.filteredData().map(
+        var sourceData = this.state.filteredData.length > 0 ? this.state.filteredData : this.props.source; 
+
+        var items = sourceData.map(
             function(item) {
                 var text = item[this.props.text];
                 return (
-                    <option value={item[this.props.value]}>
+                    <option key={item[this.props.value]} value={item[this.props.value]}>
                         {
                              this.props.textLength > 0 && text.length > this.props.textLength ?
                                 text.substring(0, this.props.textLength - 3) + '...' :
@@ -116,17 +119,16 @@ var ListBox = React.createClass({
                         }
                     </option>
                 );
-            }
-        );
+            }, this);
 
         return (
             <div className="col-md-6">
-                <h4>{this.props.title}<small> - showing </small></h4>
-                <input style="margin-bottom: 5px;" className="filter form-control"
+                <h4>{this.props.title}<small> - showing {sourceData.length}</small></h4>
+                <input style={{marginBottom: '5px'}} className="filter form-control"
                        type="text" placeholder="Filter" onChange={this.handleFilterChange} />
                 {this.buttons()}
                 <select
-                    style={"width: '100%'; height: " + (this.props.height || '200px')}
+                    style={{width: '100%', height: (this.props.height || '200px')}}
                     multiple="multiple"
                     onChange={this.handleSelectChange}>
                     {items}
@@ -136,4 +138,4 @@ var ListBox = React.createClass({
     }
 });
 
-module.export = ListBox;
+module.exports = ListBox;

@@ -1,4 +1,5 @@
-var PropTypes = React.ReactPropTypes;
+var React = require('react');
+var PropTypes = React.PropTypes;
 var ListBox = require('./listBox.jsx');
 
 function removeData(destinationData, dataToRemove, options) {
@@ -47,7 +48,7 @@ function setOptions(optionState, props) {
     return optionState;
 }
 
-module.exports = React.createClass({
+var DualListBox = React.createClass({
     displayName: 'DualListBox',
     propTypes: {
         text: PropTypes.string,
@@ -160,3 +161,5 @@ module.exports = React.createClass({
         );
     }
 });
+
+module.exports = DualListBox;

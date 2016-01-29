@@ -6,7 +6,7 @@ var ButtonComponent = React.createClass({
     render: function() {
         var btnPosition = this.getClasses();
         return (
-            <button className={"btn btn-default " + btnPosition} style="margin-bottom: 5px;"
+            <button className={"btn btn-default " + btnPosition} style={{marginBottom: '5px'}}
                     type="button" onClick={this.props.click}>
                 <span className={"glyphicon glyphicon-chevron-" + this.props.direction.toLowerCase()}></span>
             </button>
@@ -14,4 +14,4 @@ var ButtonComponent = React.createClass({
     }
 });
 
-module.export = ButtonComponent;
+module.exports = ButtonComponent;
