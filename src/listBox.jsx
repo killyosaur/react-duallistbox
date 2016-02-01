@@ -8,7 +8,7 @@ var ListBox = React.createClass({
     propTypes: {
         title: PropTypes.string.isRequired,
         source: PropTypes.arrayOf(PropTypes.object).isRequired,
-        moveAll: PropTypes.bool.isRequired,
+        moveAllBtn: PropTypes.bool.isRequired,
         onMove: PropTypes.func.isRequired,
         textLength: PropTypes.number,
         onChange: PropTypes.func.isRequired,
@@ -63,7 +63,7 @@ var ListBox = React.createClass({
             return (
                 <ButtonComponent
                     key={'s-' + thisArg.props.direction}
-                    moveAll={thisArg.props.moveAll}
+                    moveAllBtn={thisArg.props.moveAllBtn}
                     click={thisArg.onClick}
                     direction={thisArg.props.direction}
                     disable={thisArg.disabled(thisArg.state.selected.length)} />
@@ -82,14 +82,14 @@ var ListBox = React.createClass({
 
         switch(this.props.direction.toLowerCase()) {
             case 'right':
-                if (this.props.moveAll === true) {
+                if (this.props.moveAllBtn === true) {
                     btnNodes.push(btnAll(this));
                 }
                 btnNodes.push(btn(this));
                 break;
             case 'left':
                 btnNodes.push(btn(this));
-                if (this.props.moveAll === true) {
+                if (this.props.moveAllBtn === true) {
                     btnNodes.push(btnAll(this));
                 }
                 break;
@@ -123,7 +123,7 @@ var ListBox = React.createClass({
             }, this);
 
         return (
-            <div className="col-md-6">
+            <div className="col-sm-6">
                 <h4>{this.props.title}<small> - showing {sourceData.length}</small></h4>
                 <input style={{marginBottom: '5px'}} className="filter form-control"
                        type="text" placeholder="Filter" onChange={this.handleFilterChange} />

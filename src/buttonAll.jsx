@@ -30,7 +30,7 @@ var ButtonAllComponent = React.createClass({
         }
 
         return (
-            <button className="btn btn-default col-md-6" style={{marginBottom: '5px'}}
+            <button className="btn btn-default col-sm-6" style={{marginBottom: '5px'}}
                     type="button" onClick={this.props.click}>
                     {icons}
             </button>

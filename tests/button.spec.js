@@ -14,7 +14,7 @@ describe('ButtonComponent', () => {
 
     it('should render a button that is half the container width', () => {
         var button = ReactTestUtils.renderIntoDocument(
-            <ButtonComponent direction="right" moveAll= {true} />
+            <ButtonComponent direction="right" moveAllBtn= {true} />
         );
         var buttonObj = ReactTestUtils.scryRenderedDOMComponentsWithTag(button, "button")[0];
         expect(button).toBeDefined();

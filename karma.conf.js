@@ -25,6 +25,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+        './src/helpers/*.js',
         'tests.webpack.js'
     ],
 
@@ -73,7 +74,8 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    //browsers: ['PhantomJS'],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode
