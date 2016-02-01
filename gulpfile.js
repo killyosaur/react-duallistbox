@@ -7,6 +7,11 @@ var reload = browserSync.reload;
 var Server = require('karma').Server;
 var moment = require('moment');
 
+var DEST = 'dist/';
+var APP = 'app/scripts/';
+var SRC = 'src/**/*.js';
+var TEMP = '.tmp/';
+
 var banner = ['/**',
   ' * <%= pkg.name %> - <%= pkg.description %>',
   ' * @version v<%= pkg.version %>',
@@ -29,6 +34,27 @@ gulp.task('default', function () {
 gulp.task('script', function () {
     _buildTask(false);
 });
+
+gulp.task('jasmine', function () {
+    var files = [
+        'bower_components/react/react-with-addons.js',
+        'bower_components/JSCheck/jscheck.js',
+        'src/**/*.js',
+        'tests/*.spec.js'
+    ];
+
+    gulp.src(files)
+        .pipe($.jasmineBrowser.specRunner())
+        .pipe($.jasmineBrowser.server({ port: 3000 }));
+
+    return gulp.watch(files, { }, reload);
+
+});
+
+function addPkg(){
+    return gulp.src(TEMP + '*.js')
+        .pipe(gulp.dest(APP));
+}
 
 function _buildTask(watch) {
     var webpack = $.webpackBuild;

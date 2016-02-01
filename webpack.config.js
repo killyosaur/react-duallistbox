@@ -18,7 +18,7 @@ module.exports = {
     }],
     module: {
         loaders: [
-            { test: /\.jsx$/, loader: 'jsx', exclude: /(node_modules|bower_components)/ }
+            { test: /\.jsx$/, loader: 'babel', exclude: /(node_modules|bower_components)/ }
         ]
     },
     plugins: [

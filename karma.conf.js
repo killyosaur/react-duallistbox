@@ -1,6 +1,7 @@
 // Karma configuration
 // Generated on Mon Jan 25 2016 18:12:38 GMT-0500 (Eastern Standard Time)
 var webpack = require('webpack');
+var path = require('path');
 
 module.exports = function(config) {
   config.set({
@@ -14,8 +15,8 @@ module.exports = function(config) {
     frameworks: ['jasmine'],
 
     plugins: [
-        'karma-chrome-loader',
-        'karma-phantomjs-loader',
+        'karma-chrome-launcher',
+        'karma-phantomjs-launcher',
         'karma-jasmine',
         'karma-sourcemap-loader',
         'karma-webpack',
@@ -24,11 +25,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      //'bower_components/react/react-with-addons.js',
-      //'bower_components/react/react-dom.js',
-      //{pattern: 'src/**/*.js', included: false},
-      //{pattern: 'tests/', included: false}
-      'tests.webpack.js'
+        'tests.webpack.js'
     ],
 
 
@@ -40,7 +37,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'tests.webpack.js': ['webpack']
+        'tests.webpack.js': ['webpack', 'sourcemap']
     },
 
 
@@ -76,7 +73,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'PhantomJS'],
+    browsers: ['PhantomJS'],
 
 
     // Continuous Integration mode
@@ -88,20 +85,32 @@ module.exports = function(config) {
     concurrency: Infinity,
     
     webpack: {
+        devtool: 'inline-source-map',
         module: {
             loaders: [
                 { test: /\.jsx?$/, loader: 'babel-loader' }
             ],
             postLoaders:[
                 {
-                    test: /\.js$/,
+                    test: /\.jsx?$/,
                     exclude: /(tests|node_modules|bower_components)/,
                     loader: 'istanbul-instrumenter'
                 }
             ]
         },
+		plugins: [
+			new webpack.ResolverPlugin([
+				new webpack.ResolverPlugin.DirectoryDescriptionFilePlugin("bower.json", ["main"])
+			])
+		],
+		resolve: {
+			root: [path.join(__dirname, "./bower_components"), path.join(__dirname, "./src")]
+		},
         watch: true
     },
+	webpackMiddleware: {
+		noInfo: true
+	},
     webpackServer: {
         noInfo: true
     }

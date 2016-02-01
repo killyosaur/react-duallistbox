@@ -1,3 +1,4 @@
+var React = require('react');
 var PropTypes = React.PropTypes;
 var ButtonComponent = require('./button.jsx');
 var ButtonAllComponent = require('./buttonAll.jsx');

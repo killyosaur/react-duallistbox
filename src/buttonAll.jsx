@@ -1,5 +1,12 @@
+var React = require('react');
+var PropTypes = React.PropTypes;
+
 var ButtonAllComponent = React.createClass({
     displayName: 'ButtonAllComponent',
+    propTypes: {
+        direction: PropTypes.string.isRequired,
+        click: PropTypes.func
+    },
     render: function() {
         var icons = [];
         var direction = this.props.direction.toLowerCase();

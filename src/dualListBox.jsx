@@ -127,9 +127,6 @@ var DualListBox = React.createClass({
             this.props.onChange(destination);
         }
     },
-    itemsMoved: function() {
-        
-    },
     render: function() {
         return (
             <div className="form-group row">

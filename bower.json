@@ -23,10 +23,21 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "src",
+    "gulpfile.js",
+    "tests.webpack.js",
+    "webpack.config.js",
+    ".babelrc",
+    ".gitignore",
+    "karma.conf.js",
+    "package.json"
   ],
   "dependencies": {
-    "react": "~0.14.6",
+    "react": "~0.14.7",
     "bootstrap": "~3.3.6"
+  },
+  "devDependencies": {
+    "JSCheck": "douglascrockford/JSCheck"
   }
 }
