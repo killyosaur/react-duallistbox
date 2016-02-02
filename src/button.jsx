@@ -6,13 +6,15 @@ var ButtonComponent = React.createClass({
     propTypes: {
         classes: PropTypes.arrayOf(PropTypes.string).isRequired,
         click: PropTypes.func,
-        width: PropTypes.number
+        width: PropTypes.number.isRequired,
+        disable: PropTypes.bool
     },
     getDefaultProps: function() {
         return {
             width: 12,
             click: function() {},
-            classes: []
+            classes: [],
+            bool: false
         }
     },
     getIcons: function() {
@@ -26,8 +28,11 @@ var ButtonComponent = React.createClass({
     },
     render: function() {
         return (
-            <button className={"btn btn-default col-sm-" + this.props.width} style={{marginBottom: '5px'}}
-                    type="button" onClick={this.props.click}>
+            <button className={"btn btn-default col-sm-" + this.props.width}
+                    style={{marginBottom: '5px'}}
+                    type="button"
+                    onClick={this.props.click}
+                    disabled={this.props.disable}>
                 {this.getIcons()}
             </button>
         );

@@ -25,7 +25,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        './src/helpers/*.js',
+        './tests/helpers/*.js',
         'tests.webpack.js'
     ],
 

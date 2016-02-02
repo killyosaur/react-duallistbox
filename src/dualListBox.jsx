@@ -1,6 +1,6 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
-var ListBox = require('./listBox.jsx');
+var ListBox = require('listBox.jsx');
 
 var DualListBox = React.createClass({
     displayName: 'DualListBox',
@@ -22,16 +22,8 @@ var DualListBox = React.createClass({
     getInitialState: function() {
         return {
             sourceData: [],
-            filteredSource: [],
-            destinationData: [],
-            filteredDestination: []
+            destinationData: []
         };
-    },
-    handleSourceFilterChange: function(event) {
-        var result = this.filteredData(event.target.value);
-    },
-    handleDestinationFilterChange: function(event) {
-        var result = this.filteredData(event.target.value);
     },
     getDefaultProps: function() {
         return {

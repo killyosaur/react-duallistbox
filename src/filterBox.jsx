@@ -8,7 +8,7 @@ class FilterBox extends Component {
     render() {
         return (
             <input style={{marginBottom: '5px'}} className="filter form-control"
-                    type="text" placeholder="Filter" onChange={this.props.handleFilterChange} />
+                   type="text" placeholder="Filter" onChange={this.props.handleFilterChange} />
         );
     }
 };

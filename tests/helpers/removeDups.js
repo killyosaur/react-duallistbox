@@ -1,4 +1,4 @@
-const removeDups = function (data, id) {
+var removeDups = function (data, id) {
     var arr = {};
 
     for (var i = 0, len = data.length; i < len; i++) {
@@ -14,5 +14,3 @@ const removeDups = function (data, id) {
 
     return data;
 };
-
-module.exports = removeDups;

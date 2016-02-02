@@ -1,7 +1,7 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
-var ButtonComponent = require('./button.jsx');
-var ButtonAllComponent = require('./buttonAll.jsx');
+var ButtonComponent = require('button.jsx');
+var FilterBox = require('filterBox.jsx');
 
 var ListBox = React.createClass({
     displayName: 'ListBox',
@@ -22,6 +22,11 @@ var ListBox = React.createClass({
             filter: '',
             filteredData: []
         };
+    },
+    componentWillMount: function() {
+        setState({
+            filteredData: this.props.source
+        });
     },
     onClickAll: function(event) {
         this.props.onMove(this.state.filteredData);
@@ -59,38 +64,30 @@ var ListBox = React.createClass({
     },
     buttons: function() {
         var btnNodes = [];
-        var btn = function(thisArg) {
+        var btn = function(thisArg, classes, func) {
             return (
                 <ButtonComponent
-                    key={'s-' + thisArg.props.direction}
-                    moveAllBtn={thisArg.props.moveAllBtn}
-                    click={thisArg.onClick}
-                    direction={thisArg.props.direction}
-                    disable={thisArg.disabled(thisArg.state.selected.length)} />
+                    key="0"
+                    click={thisArg[func]}
+                    width={thisArg.props.moveAllBtn ? 6 : 12}
+                    disable={thisArg.disabled(thisArg.state.selected.length)} 
+                    classes={classes}/>
             );
         }
 
-        var btnAll = function(thisArg) {
-            return (
-                <ButtonAllComponent
-                    key={'a-' + thisArg.props.direction}
-                    click={thisArg.onClickAll}
-                    direction={thisArg.props.direction}
-                    disable={thisArg.disabled(thisArg.state.filteredData.length)} />
-            );
-        }
+        let chevron = `glyphicon-chevron-${this.props.direction.toLowerCase()}`;
 
         switch(this.props.direction.toLowerCase()) {
             case 'right':
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btnAll(this));
+                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll'));
                 }
-                btnNodes.push(btn(this));
+                btnNodes.push(btn(this, [chevron], 'onClick'));
                 break;
             case 'left':
-                btnNodes.push(btn(this));
+                btnNodes.push(btn(this, [chevron], 'onClick'));
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btnAll(this));
+                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll'));
                 }
                 break;
         }
@@ -106,9 +103,7 @@ var ListBox = React.createClass({
         return result;
     },
     render: function () {
-        var sourceData = this.state.filteredData.length > 0 ? this.state.filteredData : this.props.source; 
-
-        var items = sourceData.map(
+        var items = this.state.filteredData.map(
             function(item) {
                 var text = item[this.props.text];
                 return (
@@ -124,9 +119,8 @@ var ListBox = React.createClass({
 
         return (
             <div className="col-sm-6">
-                <h4>{this.props.title}<small> - showing {sourceData.length}</small></h4>
-                <input style={{marginBottom: '5px'}} className="filter form-control"
-                       type="text" placeholder="Filter" onChange={this.handleFilterChange} />
+                <h4>{this.props.title}<small> - showing {this.state.filteredData.length}</small></h4>
+                <FilterBox handleFilterChange={this.handleFilterChange} />
                 {this.buttons()}
                 <select
                     style={{width: '100%', height: (this.props.height || '200px')}}

@@ -1,4 +1,4 @@
-const removeSelectedItems = function (dataSet, selectItems, key) {
+var removeSelectedItems = function (dataSet, selectItems, key) {
     var result = [];
     for (var i = 0; i < dataSet.length; i++) {
         var remove = false;
@@ -16,5 +16,3 @@ const removeSelectedItems = function (dataSet, selectItems, key) {
 
     return result;
 };
-
-module.exports = removeSelectedItems;

@@ -4,8 +4,8 @@ var ButtonComponent = require('../src/button.jsx');
 var ButtonAllComponent = require('../src/buttonAll.jsx');
 var ListBox = require('../src/listBox.jsx');
 var JSC = require('jscheck');
-var pickOne = require('helpers/pickOne');
-var addId = require('helpers/addId');
+var pickOne = require('./helpers/pickOne');
+var addId = require('./helpers/addId');
 
 describe('ListBox', () => {
     var listBox, items, itemLength;
