@@ -12,6 +12,17 @@ describe('ButtonComponent', () => {
         expect(buttonObj.getAttribute('class')).toBe('btn btn-default col-sm-12');
     });
 
+    it('should render a full width button with 2 icons', () => {
+        var button = ReactTestUtils.renderIntoDocument(
+            <ButtonComponent classes={['glyphicon-chevron-right', 'glyphicon-list']} width={12} />
+        );
+        var icons = ReactTestUtils.scryRenderedDOMComponentsWithTag(button, "i");
+        expect(button).toBeDefined();
+        expect(icons.length).toBe(2);
+        expect(icons[0].getAttribute('class')).toBe('glyphicon glyphicon-chevron-right');
+        expect(icons[1].getAttribute('class')).toBe('glyphicon glyphicon-list');
+    });
+
     it('should render a button that is half the container width', () => {
         var button = ReactTestUtils.renderIntoDocument(
             <ButtonComponent classes={['glyphicon-chevron-right']} width={6} />
@@ -43,12 +54,13 @@ describe('ButtonComponent', () => {
         expect(onClick).not.toHaveBeenCalled();
     });
 
-    it('should throw error on render', () => {
-        expect(() => {
-            return (
-                ReactTestUtils.renderIntoDocument(
-                    <ButtonComponent />
-                ));
-        }).toThrow();
+    it('should render a button and click it, firing default function', () => {
+        var button = ReactTestUtils.renderIntoDocument(
+            <ButtonComponent classes={['glyphicon-chevron-right']} width={6} />
+        );
+        var buttonObj = ReactTestUtils.scryRenderedDOMComponentsWithTag(button, "button")[0];
+
+        ReactTestUtils.Simulate.click(buttonObj);
+        expect(button).toBeDefined();
     });
 });

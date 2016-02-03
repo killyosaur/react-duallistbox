@@ -1,20 +1,17 @@
-import React, {PropTypes, Component} from 'react';
+var React = require('react');
+var PropTypes = React.PropTypes;
 
-class FilterBox extends Component {
-    constructor(props) {
-        super(props);
-    }
-
-    render() {
+var FilterBox = React.createClass({
+   displayName: 'FilterBox',
+    propTypes: {
+        handleFilterChange: PropTypes.func.isRequired
+    },
+    render: function() {
         return (
             <input style={{marginBottom: '5px'}} className="filter form-control"
                    type="text" placeholder="Filter" onChange={this.props.handleFilterChange} />
         );
     }
-};
+});
 
-FilterBox.propTypes = {
-    handleFilterChange: PropTypes.func.isRequired
-};
-
-export default FilterBox;
+module.exports = FilterBox;

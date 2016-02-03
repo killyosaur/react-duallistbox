@@ -24,7 +24,7 @@ var ListBox = React.createClass({
         };
     },
     componentWillMount: function() {
-        setState({
+        this.setState({
             filteredData: this.props.source
         });
     },
@@ -64,10 +64,10 @@ var ListBox = React.createClass({
     },
     buttons: function() {
         var btnNodes = [];
-        var btn = function(thisArg, classes, func) {
+        var btn = function(thisArg, classes, func, key) {
             return (
                 <ButtonComponent
-                    key="0"
+                    key={key}
                     click={thisArg[func]}
                     width={thisArg.props.moveAllBtn ? 6 : 12}
                     disable={thisArg.disabled(thisArg.state.selected.length)} 
@@ -80,14 +80,14 @@ var ListBox = React.createClass({
         switch(this.props.direction.toLowerCase()) {
             case 'right':
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll'));
+                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll', 1));
                 }
-                btnNodes.push(btn(this, [chevron], 'onClick'));
+                btnNodes.push(btn(this, [chevron], 'onClick', 2));
                 break;
             case 'left':
-                btnNodes.push(btn(this, [chevron], 'onClick'));
+                btnNodes.push(btn(this, [chevron], 'onClick', 3));
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll'));
+                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll', 4));
                 }
                 break;
         }

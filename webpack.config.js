@@ -1,5 +1,6 @@
 var path = require('path'),
-    webpack = require('webpack');
+    webpack = require('webpack'),
+    RewirePlugin = require('rewire-webpack');
 
 module.exports = {
     entry: './src/duallistbox.jsx',

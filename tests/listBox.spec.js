@@ -1,11 +1,9 @@
 var React = require('react');
 var ReactTestUtils = require('react-addons-test-utils');
 var ButtonComponent = require('../src/button.jsx');
-var ButtonAllComponent = require('../src/buttonAll.jsx');
+var FilterBox = require('../src/filterBox.jsx');
 var ListBox = require('../src/listBox.jsx');
 var JSC = require('jscheck');
-var pickOne = require('./helpers/pickOne');
-var addId = require('./helpers/addId');
 
 describe('ListBox', () => {
     var listBox, items, itemLength;
@@ -17,7 +15,7 @@ describe('ListBox', () => {
             aValue: JSC.integer(),
             stringValue: JSC.string(),
             anArray: JSC.array(10, JSC.character())
-        }));
+        }))();
 
         addId(items);
 
