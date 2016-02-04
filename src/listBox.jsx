@@ -11,7 +11,6 @@ var ListBox = React.createClass({
         moveAllBtn: PropTypes.bool.isRequired,
         onMove: PropTypes.func.isRequired,
         textLength: PropTypes.number,
-        onChange: PropTypes.func.isRequired,
         text: PropTypes.string.isRequired,
         value: PropTypes.string.isRequired,
         direction: PropTypes.string.isRequired
@@ -20,47 +19,70 @@ var ListBox = React.createClass({
         return {
             selected: [],
             filter: '',
-            filteredData: []
+            filteredData: [],
+            onClickDisabled: true,
+            onClickAllDisabled: true
         };
     },
     componentWillMount: function() {
         this.setState({
-            filteredData: this.props.source
+            filteredData: this.props.source,
+            onClickAllDisabled: this.props.source.length === 0
         });
     },
     onClickAll: function(event) {
         this.props.onMove(this.state.filteredData);
         this.setState({
             selected: [],
-            filteredData: []
+            filteredData: [],
+            onClickDisabled: true,
+            onClickAllDisabled: true
         });
     },
     onClick: function(event) {
         this.props.onMove(this.state.selected);
         this.setState({
-            selected: []
+            selected: [],
+            onClickDisabled: true
         });
     },
     handleFilterChange: function(event) {
-        var result = this.filteredData(event.target.value);
+        var filter = '';
+        if (this.filterBox !== null) {
+            filter = this.filterBox.refs.filter.input || event.target.value;
+        } else {
+            filter = event.target.value;
+        }
+
+        var result = this.filterData(filter);
         this.setState({
-            filter: event.target.value,
-            filteredData: result
+            filter: filter,
+            filteredData: result,
+            selected: [],
+            onClickDisabled: true,
+            onClickAllDisabled: result.length === 0
         });
     },
     handleSelectChange: function(event) {
-        var selectedValues = [];
+        var selectedValues = [], disable = this.props.disable;
         for (var i = 0, l = event.target.options.length; i < l; i++) {
             if (event.target.options[i].selected) {
-                selectedValues.push(event.target.options[i]);
+                var itemId = event.target.options[i].value;
+                var item = this.props.source.filter(v => v[this.props.value] === itemId);
+                if (item.length > 0) {
+                    selectedValues.push(item[0]);
+                }
             }
         }
+
+        if (!disable && selectedValues.length === 0) {
+            disable = true;
+        }
+
         this.setState({
-            selected: selectedValues
+            selected: selectedValues,
+            onClickDisabled: disable
         });
-    },
-    disabled: function(sourceLength) {
-        return this.props.disable || sourceLength === 0;
     },
     buttons: function() {
         var btnNodes = [];
@@ -70,7 +92,7 @@ var ListBox = React.createClass({
                     key={key}
                     click={thisArg[func]}
                     width={thisArg.props.moveAllBtn ? 6 : 12}
-                    disable={thisArg.disabled(thisArg.state.selected.length)} 
+                    disable={thisArg.state[func + 'Disabled']} 
                     classes={classes}/>
             );
         }
@@ -94,12 +116,12 @@ var ListBox = React.createClass({
 
         return btnNodes;
     },
-    filteredData: function(filter) {
+    filterData: function(filter) {
         if (filter === '' || filter === undefined) {
             return this.props.source;
         }
 
-        var result = this.props.source.filter(function(v) { return v[this.props.text].indexOf(filter) > -1; }, this);
+        var result = this.props.source.filter(function(v) { return v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1; }, this);
         return result;
     },
     render: function () {
@@ -120,7 +142,7 @@ var ListBox = React.createClass({
         return (
             <div className="col-sm-6">
                 <h4>{this.props.title}<small> - showing {this.state.filteredData.length}</small></h4>
-                <FilterBox handleFilterChange={this.handleFilterChange} />
+                <FilterBox handleFilterChange={this.handleFilterChange} ref={(ref) => this.filterBox = ref} />
                 {this.buttons()}
                 <select
                     style={{width: '100%', height: (this.props.height || '200px')}}

@@ -234,7 +234,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        moveAllBtn: PropTypes.bool.isRequired,
 	        onMove: PropTypes.func.isRequired,
 	        textLength: PropTypes.number,
-	        onChange: PropTypes.func.isRequired,
 	        text: PropTypes.string.isRequired,
 	        value: PropTypes.string.isRequired,
 	        direction: PropTypes.string.isRequired
@@ -243,47 +242,75 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return {
 	            selected: [],
 	            filter: '',
-	            filteredData: []
+	            filteredData: [],
+	            onClickDisabled: true,
+	            onClickAllDisabled: true
 	        };
 	    },
 	    componentWillMount: function componentWillMount() {
 	        this.setState({
-	            filteredData: this.props.source
+	            filteredData: this.props.source,
+	            onClickAllDisabled: this.props.source.length === 0
 	        });
 	    },
 	    onClickAll: function onClickAll(event) {
 	        this.props.onMove(this.state.filteredData);
 	        this.setState({
 	            selected: [],
-	            filteredData: []
+	            filteredData: [],
+	            onClickDisabled: true,
+	            onClickAllDisabled: true
 	        });
 	    },
 	    onClick: function onClick(event) {
 	        this.props.onMove(this.state.selected);
 	        this.setState({
-	            selected: []
+	            selected: [],
+	            onClickDisabled: true
 	        });
 	    },
 	    handleFilterChange: function handleFilterChange(event) {
-	        var result = this.filteredData(event.target.value);
+	        var filter = '';
+	        if (this.filterBox !== null) {
+	            filter = this.filterBox.ref.filter.value || event.target.value;
+	        } else {
+	            filter = event.target.value;
+	        }
+
+	        var result = this.filterData(filter);
 	        this.setState({
-	            filter: event.target.value,
-	            filteredData: result
+	            filter: filter,
+	            filteredData: result,
+	            selected: [],
+	            onClickDisabled: true,
+	            onClickAllDisabled: result.length === 0
 	        });
 	    },
 	    handleSelectChange: function handleSelectChange(event) {
-	        var selectedValues = [];
+	        var _this = this;
+
+	        var selectedValues = [],
+	            disable = this.props.disable;
 	        for (var i = 0, l = event.target.options.length; i < l; i++) {
 	            if (event.target.options[i].selected) {
-	                selectedValues.push(event.target.options[i]);
+	                var itemId = event.target.options[i].value;
+	                var item = this.props.source.filter(function (v) {
+	                    return v[_this.props.value] === itemId;
+	                });
+	                if (item.length > 0) {
+	                    selectedValues.push(item[0]);
+	                }
 	            }
 	        }
+
+	        if (!disable && selectedValues.length === 0) {
+	            disable = true;
+	        }
+
 	        this.setState({
-	            selected: selectedValues
+	            selected: selectedValues,
+	            onClickDisabled: disable
 	        });
-	    },
-	    disabled: function disabled(sourceLength) {
-	        return this.props.disable || sourceLength === 0;
 	    },
 	    buttons: function buttons() {
 	        var btnNodes = [];
@@ -292,7 +319,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                key: key,
 	                click: thisArg[func],
 	                width: thisArg.props.moveAllBtn ? 6 : 12,
-	                disable: thisArg.disabled(thisArg.state.selected.length),
+	                disable: thisArg.state[func + 'Disabled'],
 	                classes: classes });
 	        };
 
@@ -315,17 +342,19 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return btnNodes;
 	    },
-	    filteredData: function filteredData(filter) {
+	    filterData: function filterData(filter) {
 	        if (filter === '' || filter === undefined) {
 	            return this.props.source;
 	        }
 
 	        var result = this.props.source.filter(function (v) {
-	            return v[this.props.text].indexOf(filter) > -1;
+	            return v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1;
 	        }, this);
 	        return result;
 	    },
 	    render: function render() {
+	        var _this2 = this;
+
 	        var items = this.state.filteredData.map(function (item) {
 	            var text = item[this.props.text];
 	            return React.createElement(
@@ -349,7 +378,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this.state.filteredData.length
 	                )
 	            ),
-	            React.createElement(FilterBox, { handleFilterChange: this.handleFilterChange }),
+	            React.createElement(FilterBox, { handleFilterChange: this.handleFilterChange, ref: function ref(_ref) {
+	                    return _this2.filterBox = _ref;
+	                } }),
 	            this.buttons(),
 	            React.createElement(
 	                'select',
@@ -427,7 +458,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        handleFilterChange: PropTypes.func.isRequired
 	    },
 	    render: function render() {
-	        return React.createElement('input', { style: { marginBottom: '5px' }, className: 'filter form-control',
+	        return React.createElement('input', { style: { marginBottom: '5px' }, className: 'filter form-control', ref: 'filter',
 	            type: 'text', placeholder: 'Filter', onChange: this.props.handleFilterChange });
 	    }
 	});
