@@ -7,6 +7,7 @@ var JSC = require('jscheck');
 
 describe('ListBox', () => {
     var listBox, items, itemLength;
+    var shallowRenderer = ReactTestUtils.createRenderer();
     
     beforeEach(() => {
         itemLength = 1000;
@@ -18,25 +19,61 @@ describe('ListBox', () => {
         }))();
 
         addId(items);
-
-        listBox = ReactTestUtils.renderIntoDocument(
-            <ListBox 
-                direction="right"
-                title="A Title"
-                moveAllBtn={true}
-                onMove={jasmine.createSpy('onMove')}
-                onChange={jasmine.createSpy('onChange')}
-                text="name"
-                source={items}
-                value="id" />
-        );
     });
+    
+    describe('right', () => {
+        describe('2 buttons', () => {
+            beforeEach(() => {
+                listBox = shallowRenderer.render(
+                    <ListBox 
+                        direction="right"
+                        title= "A Title"
+                        moveAllBtn= { true }
+                        onMove= { jasmine.createSpy('onMove') }
+                        onChange= { jasmine.createSpy('onChange') }
+                        text= "name"
+                        source= { items }
+                        value= "id" />
+                );
+            });
 
-    describe('onClickAll', () => {
-        it('should fire the onMove function with all data', () => {
-            expect(items.length).toBe(itemLength);
+            it('should render a right directed listbox', () => {
+                expect(listBox).toBeDefined();
+                //var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                //var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+                
+                //expect(buttons.length).toBe(2);
+                //expect(filterBox).toBeDefined();
+                expect(selectBox).toBeDefined();
+                expect(selectBox.options.length).toBe(itemLength);
+            });
 
-            
+            describe('onClickAll', () => {
+                it('should fire the onMove function with all data', () => {
+                    expect(items.length).toBe(itemLength);
+                });
+            });
         });
-    })
+
+        describe('1 button', () => {
+            beforeEach(() => {
+                listBox = shallowRenderer.render(
+                    <ListBox 
+                        direction="right"
+                        title= "A Title"
+                        moveAllBtn= { false }
+                        onMove= { jasmine.createSpy('onMove') }
+                        onChange= { jasmine.createSpy('onChange') }
+                        text= "name"
+                        source= { items }
+                        value= "id" />
+                );
+            });
+
+            it('should render a left directed listbox', () => {
+                expect(listBox).toBeDefined();
+            });
+        });
+    });
 });

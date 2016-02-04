@@ -8,7 +8,7 @@ var FilterBox = React.createClass({
     },
     render: function() {
         return (
-            <input style={{marginBottom: '5px'}} className="filter form-control"
+            <input style={{marginBottom: '5px'}} className="filter form-control" ref='filter'
                    type="text" placeholder="Filter" onChange={this.props.handleFilterChange} />
         );
     }

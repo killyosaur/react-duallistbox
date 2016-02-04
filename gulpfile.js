@@ -39,7 +39,8 @@ gulp.task('jasmine', function () {
     var files = [
         'bower_components/react/react-with-addons.js',
         'bower_components/JSCheck/jscheck.js',
-        'src/**/*.js',
+        'tests/helpers/*.js',
+        'src/**/*.jsx',
         'tests/*.spec.js'
     ];
 
