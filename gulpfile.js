@@ -36,23 +36,6 @@ gulp.task('script', function () {
     _buildTask(false);
 });
 
-gulp.task('jasmine', function () {
-    var files = [
-        'bower_components/react/react-with-addons.js',
-        'bower_components/JSCheck/jscheck.js',
-        'tests/helpers/*.js',
-        'src/**/*.jsx',
-        'tests/*.spec.js'
-    ];
-
-    gulp.src(files)
-        .pipe($.jasmineBrowser.specRunner())
-        .pipe($.jasmineBrowser.server({ port: 3000 }));
-
-    return gulp.watch(files, { }, reload);
-
-});
-
 function addPkg(){
     return gulp.src(TEMP + '*.js')
         .pipe(gulp.dest(APP));

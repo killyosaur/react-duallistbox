@@ -65,9 +65,10 @@ var ListBox = React.createClass({
     },
     handleSelectChange: function(event) {
         var selectedValues = [], disable = this.props.disable;
-        for (var i = 0, l = event.target.options.length; i < l; i++) {
-            if (event.target.options[i].selected) {
-                var itemId = event.target.options[i].value;
+        var select = this.refs.select || event.target;
+        for (var i = 0, l = select.options.length; i < l; i++) {
+            if (select.options[i].selected) {
+                var itemId = parseInt(select.options[i].value);
                 var item = this.props.source.filter(v => v[this.props.value] === itemId);
                 if (item.length > 0) {
                     selectedValues.push(item[0]);
@@ -145,6 +146,7 @@ var ListBox = React.createClass({
                 <FilterBox handleFilterChange={this.handleFilterChange} ref={(ref) => this.filterBox = ref} />
                 {this.buttons()}
                 <select
+                    ref='select'
                     style={{width: '100%', height: (this.props.height || '200px')}}
                     multiple="multiple"
                     onChange={this.handleSelectChange}>

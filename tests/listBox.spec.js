@@ -148,7 +148,6 @@ describe('ListBox:', () => {
                     value= "id" />
             );
 
-
             var results = listBox.filterData('');
             
             expect(results).toEqual(items);
@@ -254,6 +253,84 @@ describe('ListBox:', () => {
             expect(onMove).not.toHaveBeenCalled();
             expect(selectBox.options.length).toBe(0);
             expect(items.length).toBe(itemLength);
+        });
+    });
+
+    describe('onClick', () => {
+        beforeEach(() => {
+            listBox = ReactTestUtils.renderIntoDocument(
+                <ListBox 
+                    direction="right"
+                    title= "A Title"
+                    moveAllBtn= { true }
+                    onMove= { onMove }
+                    text= "name"
+                    source= { items }
+                    value= "id" />
+            );
+        });
+
+       it('should not fire the onMove function as no items selected', () => {
+            expect(items.length).toBe(itemLength);
+            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+            expect(selectBox.options.length).toBe(itemLength);
+            ReactTestUtils.Simulate.click(buttonToClick);
+
+            expect(onMove).not.toHaveBeenCalled();
+            expect(selectBox.options.length).toBe(itemLength);
+            expect(items.length).toBe(itemLength);
+        });
+
+       it('should fire the onMove function with selected data', () => {
+            expect(items.length).toBe(itemLength);
+            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+            expect(selectBox.options.length).toBe(itemLength);
+
+            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+            var expected = [];
+            for (var i = 0; i < indices.length; i++) {
+                if (expected.indexOf(items[indices[i]]) === -1) {
+                    expected.push(items[indices[i]]);
+                    selectBox.options[indices[i]].selected = true;
+                }
+            }
+            ReactTestUtils.Simulate.change(selectBox);
+
+            ReactTestUtils.Simulate.click(buttonToClick);
+
+            expect(onMove).toHaveBeenCalledWith(expected);
+            expect(selectBox.options.length).toBe(itemLength - expected.length);
+            expect(items.length).toBe(itemLength);
+        });
+
+        xit('should fire the onMove function with filtered and selected data', () => {
+            expect(items.length).toBe(itemLength);
+            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+            var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+            var expected = listBox.filterData('Bang');
+            var node = filterBox.refs.filter;
+            node.input = 'Bang';
+            ReactTestUtils.Simulate.change(node);
+            expect(buttonToClick.getAttribute('disabled')).toBeNull();
+
+            expect(selectBox.options.length).toBe(expected.length);
+            ReactTestUtils.Simulate.click(buttonToClick);
+
+            expect(onMove).toHaveBeenCalledWith(expected);
+            expect(selectBox.options.length).toBe(0);
+            expect(items.length).toBe(itemLength);
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
         });
     });
 
