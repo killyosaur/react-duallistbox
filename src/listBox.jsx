@@ -27,8 +27,17 @@ var ListBox = React.createClass({
     componentWillMount: function() {
         this.setState({
             filteredData: this.props.source,
-            onClickAllDisabled: this.props.source.length === 0
+            onClickAllDisabled: this.props.disable || this.props.source.length === 0
         });
+    },
+    componentWillReceiveProps: function(nextProps) {
+        if (this.props.source !== nextProps.source) {
+            var filteredData = this.filterData(this.state.filter, nextProps.source);
+            this.setState({
+                filteredData: filteredData,
+                onClickAllDisabled: this.props.disable || filteredData.length === 0
+            });
+        }
     },
     onClickAll: function(event) {
         this.props.onMove(this.state.filteredData);
@@ -60,7 +69,7 @@ var ListBox = React.createClass({
             filteredData: result,
             selected: [],
             onClickDisabled: true,
-            onClickAllDisabled: result.length === 0
+            onClickAllDisabled: this.props.disable || result.length === 0
         });
     },
     handleSelectChange: function(event) {
@@ -117,20 +126,22 @@ var ListBox = React.createClass({
 
         return btnNodes;
     },
-    filterData: function(filter) {
+    filterData: function(filter, source) {
+        var source = source || this.props.source;
         if (filter === '' || filter === undefined) {
-            return this.props.source;
+            return source;
         }
 
-        var result = this.props.source.filter(function(v) { return v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1; }, this);
+        var result = source.filter(v => 
+            v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1);
         return result;
     },
     render: function () {
         var items = this.state.filteredData.map(
-            function(item) {
+            (item, index) => {
                 var text = item[this.props.text];
                 return (
-                    <option key={item[this.props.value]} value={item[this.props.value]}>
+                    <option key={index} value={item[this.props.value]}>
                         {
                              this.props.textLength > 0 && text.length > this.props.textLength ?
                                 text.substring(0, this.props.textLength - 3) + '...' :

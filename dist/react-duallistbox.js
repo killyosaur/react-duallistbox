@@ -1,3 +1,9 @@
+/*!
+ * react-duallistbox - a dual list box for selecting and moving data using react
+ * @version v0.1.0
+ * @link https://github.com/killyosaur/react-duallistbox#readme
+ * @license CC-BY-SA-4.0
+ */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("react"));
@@ -63,8 +69,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	var DualListBox = React.createClass({
 	    displayName: 'DualListBox',
 	    propTypes: {
-	        text: PropTypes.string,
-	        value: PropTypes.string,
+	        text: PropTypes.string.isRequired,
+	        value: PropTypes.string.isRequired,
 	        sourceTitle: PropTypes.string,
 	        destinationTitle: PropTypes.string,
 	        timeout: PropTypes.number,
@@ -99,11 +105,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    },
 	    componentWillMount: function componentWillMount() {
-	        var sourceData = removeData(this.props.source, this.props.destination, options);
+	        var sourceData = this.removeData(this.props.source, this.props.destination).sort(this.compare);
 
 	        this.setState({
 	            sourceData: sourceData,
-	            destinationData: this.props.destination
+	            destinationData: this.props.destination.sort(this.compare)
+	        });
+	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        var sourceData = this.removeData(nextProps.source, nextProps.destination).sort(this.compare);
+
+	        this.setState({
+	            sourceData: sourceData,
+	            destinationData: nextProps.destination.sort(this.compare)
 	        });
 	    },
 	    removeData: function removeData(destinationData, dataToRemove) {
@@ -122,40 +136,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	            length = data.length;
 	        if (!data || data.length === 0) return -1;
 
-	        if (item.hasOwnProperty(this.props.options.value)) {
-	            for (; ind < length; ind++) {
-	                if (data[ind][this.props.options.value] === item[this.props.options.value]) {
-	                    return ind;
-	                }
-	            }
-	        } else {
-	            for (; ind < length; ind++) {
-	                var isEqual = false;
-	                for (var j in item) {
-	                    if (data[ind].hasOwnProperty(j) && item.hasOwnProperty(j)) {
-	                        isEqual = data[ind][j] === item[j];
-	                    }
-	                }
-	                if (isEqual) {
-	                    return ind;
-	                }
+	        for (; ind < length; ind++) {
+	            if (data[ind][this.props.value] === item[this.props.value]) {
+	                return ind;
 	            }
 	        }
+
 	        return -1;
 	    },
 	    compare: function compare(a, b) {
-	        if (a[this.props.options.sortBy] > b[this.props.options.sortBy]) {
-	            return 1;
+	        if (typeof a[this.props.sortBy] === 'string' && typeof b[this.props.sortBy] === 'string') {
+	            return a[this.props.sortBy].localeCompare(b[this.props.sortBy]);
 	        }
-	        if (a[this.props.options.sortBy] < b[this.props.options.sortBy]) {
-	            return -1;
-	        }
-	        return 0;
+
+	        return a[this.props.sortBy] === b[this.props.sortBy] ? 0 : a[this.props.sortBy] > b[this.props.sortBy] ? 1 : -1;
 	    },
 	    moveLeft: function moveLeft(itemsToMove) {
+	        var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
 	        var destination = this.removeData(this.state.destinationData, itemsToMove);
 	        this.setState({
-	            sourceData: this.state.sourceData.concat(itemsToMove).sort(this.compare),
+	            sourceData: source,
 	            destinationData: destination
 	        });
 
@@ -180,28 +180,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            'div',
 	            { className: 'form-group row' },
 	            React.createElement(ListBox, {
-	                title: this.props.options.sourceTitle,
+	                ref: 'right',
+	                title: this.props.sourceTitle,
 	                source: this.state.sourceData,
-	                moveAll: this.props.options.moveAllBtn,
+	                moveAllBtn: this.props.moveAllBtn,
 	                onMove: this.moveRight,
-	                textLength: this.props.options.textLength,
-	                onChange: this.itemsMoved,
-	                text: this.props.options.text,
-	                value: this.props.options.value,
+	                textLength: this.props.textLength,
+	                text: this.props.text,
+	                value: this.props.value,
 	                disable: this.props.disable,
-	                height: this.props.options.height,
+	                height: this.props.height,
 	                direction: 'right' }),
 	            React.createElement(ListBox, {
-	                title: this.props.options.destinationTitle,
+	                ref: 'left',
+	                title: this.props.destinationTitle,
 	                source: this.state.destinationData,
-	                moveAll: this.props.options.moveAllBtn,
+	                moveAllBtn: this.props.moveAllBtn,
 	                onMove: this.moveLeft,
-	                textLength: this.props.options.textLength,
-	                onChange: this.itemsMoved,
-	                text: this.props.options.text,
-	                value: this.props.options.value,
+	                textLength: this.props.textLength,
+	                text: this.props.text,
+	                value: this.props.value,
 	                disable: this.props.disable,
-	                height: this.props.options.height,
+	                height: this.props.height,
 	                direction: 'left' })
 	        );
 	    }
@@ -250,8 +250,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    componentWillMount: function componentWillMount() {
 	        this.setState({
 	            filteredData: this.props.source,
-	            onClickAllDisabled: this.props.source.length === 0
+	            onClickAllDisabled: this.props.disable || this.props.source.length === 0
 	        });
+	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        if (this.props.source !== nextProps.source) {
+	            var filteredData = this.filterData(this.state.filter, nextProps.source);
+	            this.setState({
+	                filteredData: filteredData,
+	                onClickAllDisabled: this.props.disable || filteredData.length === 0
+	            });
+	        }
 	    },
 	    onClickAll: function onClickAll(event) {
 	        this.props.onMove(this.state.filteredData);
@@ -272,7 +281,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    handleFilterChange: function handleFilterChange(event) {
 	        var filter = '';
 	        if (this.filterBox !== null) {
-	            filter = this.filterBox.ref.filter.value || event.target.value;
+	            filter = this.filterBox.refs.filter.input || event.target.value;
 	        } else {
 	            filter = event.target.value;
 	        }
@@ -283,7 +292,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            filteredData: result,
 	            selected: [],
 	            onClickDisabled: true,
-	            onClickAllDisabled: result.length === 0
+	            onClickAllDisabled: this.props.disable || result.length === 0
 	        });
 	    },
 	    handleSelectChange: function handleSelectChange(event) {
@@ -291,9 +300,10 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        var selectedValues = [],
 	            disable = this.props.disable;
-	        for (var i = 0, l = event.target.options.length; i < l; i++) {
-	            if (event.target.options[i].selected) {
-	                var itemId = event.target.options[i].value;
+	        var select = this.refs.select || event.target;
+	        for (var i = 0, l = select.options.length; i < l; i++) {
+	            if (select.options[i].selected) {
+	                var itemId = parseInt(select.options[i].value);
 	                var item = this.props.source.filter(function (v) {
 	                    return v[_this.props.value] === itemId;
 	                });
@@ -342,25 +352,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        return btnNodes;
 	    },
-	    filterData: function filterData(filter) {
+	    filterData: function filterData(filter, source) {
+	        var _this2 = this;
+
+	        var source = source || this.props.source;
 	        if (filter === '' || filter === undefined) {
-	            return this.props.source;
+	            return source;
 	        }
 
-	        var result = this.props.source.filter(function (v) {
-	            return v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1;
-	        }, this);
+	        var result = source.filter(function (v) {
+	            return v[_this2.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1;
+	        });
 	        return result;
 	    },
 	    render: function render() {
-	        var _this2 = this;
+	        var _this3 = this;
 
-	        var items = this.state.filteredData.map(function (item) {
-	            var text = item[this.props.text];
+	        var items = this.state.filteredData.map(function (item, index) {
+	            var text = item[_this3.props.text];
 	            return React.createElement(
 	                'option',
-	                { key: item[this.props.value], value: item[this.props.value] },
-	                this.props.textLength > 0 && text.length > this.props.textLength ? text.substring(0, this.props.textLength - 3) + '...' : text
+	                { key: index, value: item[_this3.props.value] },
+	                _this3.props.textLength > 0 && text.length > _this3.props.textLength ? text.substring(0, _this3.props.textLength - 3) + '...' : text
 	            );
 	        }, this);
 
@@ -379,12 +392,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                )
 	            ),
 	            React.createElement(FilterBox, { handleFilterChange: this.handleFilterChange, ref: function ref(_ref) {
-	                    return _this2.filterBox = _ref;
+	                    return _this3.filterBox = _ref;
 	                } }),
 	            this.buttons(),
 	            React.createElement(
 	                'select',
 	                {
+	                    ref: 'select',
 	                    style: { width: '100%', height: this.props.height || '200px' },
 	                    multiple: 'multiple',
 	                    onChange: this.handleSelectChange },

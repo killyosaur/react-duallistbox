@@ -5,8 +5,8 @@ var ListBox = require('listBox.jsx');
 var DualListBox = React.createClass({
     displayName: 'DualListBox',
     propTypes: {
-        text: PropTypes.string,
-        value: PropTypes.string,
+        text: PropTypes.string.isRequired,
+        value: PropTypes.string.isRequired,
         sourceTitle: PropTypes.string,
         destinationTitle: PropTypes.string,
         timeout: PropTypes.number,
@@ -41,11 +41,19 @@ var DualListBox = React.createClass({
         };
     },
     componentWillMount: function() {
-        var sourceData = removeData(this.props.source, this.props.destination, options);
+        var sourceData = this.removeData(this.props.source, this.props.destination).sort(this.compare);
 
         this.setState({
             sourceData: sourceData,
-            destinationData: this.props.destination
+            destinationData: this.props.destination.sort(this.compare)
+        });
+    },
+    componentWillReceiveProps: function(nextProps) {
+        var sourceData = this.removeData(nextProps.source, nextProps.destination).sort(this.compare);
+
+        this.setState({
+            sourceData: sourceData,
+            destinationData: nextProps.destination.sort(this.compare)
         });
     },
     removeData: function(destinationData, dataToRemove) {
@@ -62,41 +70,30 @@ var DualListBox = React.createClass({
     getIndex: function(data, item) {
         var ind = 0, length = data.length;
         if (!data || data.length === 0) return -1;
-        
-        if (item.hasOwnProperty(this.props.options.value)) {
-            for (; ind < length; ind++) {
-                if (data[ind][this.props.options.value] === item[this.props.options.value]) {
-                    return ind;
-                }
-            }
-        } else {
-            for (; ind < length; ind++) {
-                var isEqual = false;
-                for (var j in item) {
-                    if (data[ind].hasOwnProperty(j) && item.hasOwnProperty(j)) {
-                        isEqual = data[ind][j] === item[j];
-                    }
-                }
-                if(isEqual) {
-                    return ind;
-                }
+
+        for (; ind < length; ind++) {
+            if (data[ind][this.props.value] === item[this.props.value]) {
+                return ind;
             }
         }
+
         return -1;
     },
     compare: function(a, b) {
-        if (a[this.props.options.sortBy] > b[this.props.options.sortBy]) {
-            return 1;
+        if(typeof a[this.props.sortBy] === 'string' && 
+            typeof b[this.props.sortBy] === 'string')
+        {
+            return a[this.props.sortBy].localeCompare(b[this.props.sortBy])
         }
-        if (a[this.props.options.sortBy] < b[this.props.options.sortBy]) {
-            return -1;
-        }
-        return 0;
+
+        return a[this.props.sortBy] === b[this.props.sortBy] ? 0 : 
+            a[this.props.sortBy] > b[this.props.sortBy] ? 1 : -1;
     },
     moveLeft: function(itemsToMove) {
+        var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
         var destination = this.removeData(this.state.destinationData, itemsToMove);
         this.setState({
-            sourceData: this.state.sourceData.concat(itemsToMove).sort(this.compare),
+            sourceData: source,
             destinationData: destination
         });
 
@@ -120,28 +117,28 @@ var DualListBox = React.createClass({
         return (
             <div className="form-group row">
                 <ListBox 
-                    title={this.props.options.sourceTitle}
+                    ref="right"
+                    title={this.props.sourceTitle}
                     source={this.state.sourceData}
-                    moveAll={this.props.options.moveAllBtn}
+                    moveAllBtn={this.props.moveAllBtn}
                     onMove={this.moveRight}
-                    textLength={this.props.options.textLength}
-                    onChange={this.itemsMoved}
-                    text={this.props.options.text}
-                    value={this.props.options.value}
+                    textLength={this.props.textLength}
+                    text={this.props.text}
+                    value={this.props.value}
                     disable={this.props.disable}
-                    height={this.props.options.height}
+                    height={this.props.height}
                     direction="right" />
                 <ListBox
-                    title={this.props.options.destinationTitle}
+                    ref="left"
+                    title={this.props.destinationTitle}
                     source={this.state.destinationData}
-                    moveAll={this.props.options.moveAllBtn}
+                    moveAllBtn={this.props.moveAllBtn}
                     onMove={this.moveLeft}
-                    textLength={this.props.options.textLength}
-                    onChange={this.itemsMoved}
-                    text={this.props.options.text}
-                    value={this.props.options.value}
+                    textLength={this.props.textLength}
+                    text={this.props.text}
+                    value={this.props.value}
                     disable={this.props.disable}
-                    height={this.props.options.height}
+                    height={this.props.height}
                     direction="left" />
             </div>
         );

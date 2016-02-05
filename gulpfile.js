@@ -13,12 +13,12 @@ var APP = 'app/scripts/';
 var SRC = 'src/**/*.js';
 var TEMP = '.tmp/';
 
-var banner = ['/**',
+var banner = ['/*!',
   ' * <%= pkg.name %> - <%= pkg.description %>',
   ' * @version v<%= pkg.version %>',
   ' * @link <%= pkg.homepage %>',
   ' * @license <%= pkg.license %>',
-  ' */'].join('\n');
+  ' */\n'].join('\n');
 
 gulp.task('test', function(done) {
    new Server({
@@ -28,23 +28,39 @@ gulp.task('test', function(done) {
    }).start();
 });
 
-gulp.task('default', function () {
+gulp.task('default', ['minify'], function () {
 
 });
+
+gulp.task('clean-dest', function() {
+    return del([DEST + '*']);
+});
+
+gulp.task('minify', function() {
+    var envs = $.env.set({
+        PROD_DEV: 1
+    });
+
+    return gulp.src($.webpackBuild.config.CONFIG_FILENAME)
+        .pipe(envs)
+        .pipe($.webpackBuild.run(_after));
+})
 
 gulp.task('script', function () {
-    _buildTask(false);
+    return _buildTask(false);
 });
-
-function addPkg(){
-    return gulp.src(TEMP + '*.js')
-        .pipe(gulp.dest(APP));
-}
 
 function _buildTask(watch) {
     var webpack = $.webpackBuild;
+
+    var envs = $.env.set({
+        PROD_DEV: 0
+    });
+
     return gulp.src(webpack.config.CONFIG_FILENAME)
-        .pipe(watch ? webpack.watch(_after) : webpack.run(_after));
+        .pipe(envs)
+        .pipe(watch ? webpack.watch(_after) : webpack.run(_after))
+        .pipe(envs.reset);
 }
 
 function _after(err, stats) {

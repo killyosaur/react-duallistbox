@@ -51,6 +51,86 @@ describe('ListBox:', () => {
         }
     });
 
+    it('title should be "A Title - showing [itemLength]"', () => {
+        listBox = ReactTestUtils.renderIntoDocument(
+            <ListBox 
+                direction="right"
+                title= "A Title"
+                moveAllBtn= { true }
+                onMove= { onMove }
+                text= "name"
+                source= { items }
+                value= "id"
+                textLength={10} />
+        );
+
+        expect(listBox).toBeDefined();
+        var header = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'h4');
+
+        expect(header.innerText).toEqual('A Title - showing ' + itemLength)
+    });
+
+    it('disable should disable both buttons', () => {
+        listBox = ReactTestUtils.renderIntoDocument(
+            <ListBox 
+                direction="right"
+                title= "A Title"
+                moveAllBtn= { true }
+                onMove= { onMove }
+                text= "name"
+                source= { items }
+                value= "id"
+                disable={true}
+                textLength={10} />
+        );
+
+        expect(listBox).toBeDefined();
+        var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+        
+        var btnAll = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
+        var btn = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+
+        expect(btnAll.getAttribute('disabled')).toBe('');
+        expect(btn.getAttribute('disabled')).toBe('');
+    });
+
+    it('should not update source as source has not changed', () => {
+        var component = document.createElement('div');
+        listBox = ReactDOM.render(
+            <ListBox 
+                direction="right"
+                title= "A Title"
+                moveAllBtn= { true }
+                onMove= { onMove }
+                text= "name"
+                source= { items }
+                value= "id"
+                disable={true}
+                textLength={10} />, component
+        );
+
+        expect(listBox).toBeDefined();
+        var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+        expect(selectBox.options.length).toBe(itemLength);
+
+        listBox = ReactDOM.render(
+            <ListBox 
+                direction="right"
+                title= "A Title"
+                moveAllBtn= { false }
+                onMove= { onMove }
+                text= "name"
+                source= { items }
+                value= "id"
+                disable={true}
+                textLength={10} />, component
+        );
+        var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+        expect(selectBox.options.length).toBe(itemLength);
+    });
+
     describe('filterData', () => {
         it('should filter data by given string', () => {
             items = [
@@ -257,8 +337,24 @@ describe('ListBox:', () => {
     });
 
     describe('onClick', () => {
+        var container;
         beforeEach(() => {
-            listBox = ReactTestUtils.renderIntoDocument(
+            onMove = jasmine.createSpy('onMove').and.callFake(function(results) {
+                items = removeSelectedItems(items, results, 'id');
+                listBox = ReactDOM.render(
+                    <ListBox 
+                        direction="right"
+                        title= "A Title"
+                        moveAllBtn= { true }
+                        onMove= { onMove }
+                        text= "name"
+                        source= { items }
+                        value= "id" />, container
+                );
+            });
+
+            container = document.createElement('div');
+            listBox = ReactDOM.render(
                 <ListBox 
                     direction="right"
                     title= "A Title"
@@ -266,7 +362,7 @@ describe('ListBox:', () => {
                     onMove= { onMove }
                     text= "name"
                     source= { items }
-                    value= "id" />
+                    value= "id" />, container
             );
         });
 
@@ -278,6 +374,58 @@ describe('ListBox:', () => {
 
             expect(buttonToClick.getAttribute('disabled')).toBe('');
             expect(selectBox.options.length).toBe(itemLength);
+            ReactTestUtils.Simulate.click(buttonToClick);
+
+            expect(onMove).not.toHaveBeenCalled();
+            expect(selectBox.options.length).toBe(itemLength);
+            expect(items.length).toBe(itemLength);
+        });
+
+       it('should not fire the onMove function as buttons are disabled', () => {
+            onMove = jasmine.createSpy('onMove').and.callFake(function(results) {
+                items = removeSelectedItems(items, results, 'id');
+                listBox = ReactDOM.render(
+                    <ListBox 
+                        direction="right"
+                        title= "A Title"
+                        moveAllBtn= { true }
+                        onMove= { onMove }
+                        text= "name"
+                        disable={true}
+                        source= { items }
+                        value= "id" />, container
+                );
+            });
+
+            container = document.createElement('div');
+            listBox = ReactDOM.render(
+                <ListBox 
+                    direction="right"
+                    title= "A Title"
+                    moveAllBtn= { true }
+                    onMove= { onMove }
+                    text= "name"
+                    disable={true}
+                    source= { items }
+                    value= "id" />, container
+            );
+            expect(items.length).toBe(itemLength);
+            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+            expect(selectBox.options.length).toBe(itemLength);
+
+            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+            var expected = [];
+            for (var i = 0; i < indices.length; i++) {
+                if (expected.indexOf(items[indices[i]]) === -1) {
+                    expected.push(items[indices[i]]);
+                    selectBox.options[indices[i]].selected = true;
+                }
+            }
+            ReactTestUtils.Simulate.change(selectBox);
             ReactTestUtils.Simulate.click(buttonToClick);
 
             expect(onMove).not.toHaveBeenCalled();
@@ -306,30 +454,66 @@ describe('ListBox:', () => {
 
             ReactTestUtils.Simulate.click(buttonToClick);
 
-            expect(onMove).toHaveBeenCalledWith(expected);
+            expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
             expect(selectBox.options.length).toBe(itemLength - expected.length);
-            expect(items.length).toBe(itemLength);
+            expect(items.length).toBe(itemLength - expected.length);
         });
 
-        xit('should fire the onMove function with filtered and selected data', () => {
+       it('should disable the select move button when all data deselected', () => {
+            expect(items.length).toBe(itemLength);
+            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+            expect(selectBox.options.length).toBe(itemLength);
+
+            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+            var i;
+            for (i = 0; i < indices.length; i++) {
+                selectBox.options[indices[i]].selected = true;
+            }
+            ReactTestUtils.Simulate.change(selectBox);
+            expect(buttonToClick.getAttribute('disabled')).toBeNull();
+
+            for (i = 0; i < indices.length; i++) {
+                selectBox.options[indices[i]].selected = false;
+            }
+            ReactTestUtils.Simulate.change(selectBox);
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+        });
+
+        it('should fire the onMove function with filtered and selected data', () => {
             expect(items.length).toBe(itemLength);
             var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
             var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
             var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
             var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
 
-            var expected = listBox.filterData('Bang');
+            var expectedFiltered = listBox.filterData('Bang');
+            var indices = JSC.array(5, JSC.integer(0, expectedFiltered.length - 1))();
             var node = filterBox.refs.filter;
             node.input = 'Bang';
             ReactTestUtils.Simulate.change(node);
+            expect(buttonToClick.getAttribute('disabled')).toBe('');
+
+            expect(selectBox.options.length).toBe(expectedFiltered.length);
+
+            var expected = [];
+            for (var i = 0; i < indices.length; i++) {
+                if (expected.indexOf(expectedFiltered[indices[i]]) === -1) {
+                    expected.push(expectedFiltered[indices[i]]);
+                    selectBox.options[indices[i]].selected = true;
+                }
+            }
+            ReactTestUtils.Simulate.change(selectBox);
             expect(buttonToClick.getAttribute('disabled')).toBeNull();
 
-            expect(selectBox.options.length).toBe(expected.length);
             ReactTestUtils.Simulate.click(buttonToClick);
 
-            expect(onMove).toHaveBeenCalledWith(expected);
-            expect(selectBox.options.length).toBe(0);
-            expect(items.length).toBe(itemLength);
+            expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
+            expect(selectBox.options.length).toBe(expectedFiltered.length - expected.length);
+            expect(items.length).toBe(itemLength - expected.length);
             expect(buttonToClick.getAttribute('disabled')).toBe('');
         });
     });
@@ -366,7 +550,6 @@ describe('ListBox:', () => {
                 expect(filterBox).toBeDefined();
                 expect(selectBox).toBeDefined();
                 expect(selectBox.options.length).toBe(itemLength);
-                expect(items.length).toBe(itemLength);
             });
         });
 
@@ -389,8 +572,77 @@ describe('ListBox:', () => {
                 var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
                 var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
                 var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+                var icons = ReactTestUtils.scryRenderedDOMComponentsWithTag(buttons[0], 'i');
 
                 expect(buttons.length).toBe(1);
+                expect(icons.length).toBe(1);
+                expect(icons[0].getAttribute('class')).toBe('glyphicon glyphicon-chevron-right');
+                expect(filterBox).toBeDefined();
+                expect(selectBox).toBeDefined();
+                expect(selectBox.options.length).toBe(itemLength);
+            });
+        });
+    });
+
+    describe('left,', () => {
+        describe('2 buttons,', () => {
+            beforeEach(() => {
+                listBox = ReactTestUtils.renderIntoDocument(
+                    <ListBox 
+                        direction="left"
+                        title= "A Title"
+                        moveAllBtn= { true }
+                        onMove= { onMove }
+                        text= "name"
+                        source= { items }
+                        value= "id" />
+                );
+            });
+
+            it('should render a left directed listbox', () => {
+                expect(listBox).toBeDefined();
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+                var iconsAll = ReactTestUtils.scryRenderedDOMComponentsWithTag(buttons[1], 'i');
+                var icons = ReactTestUtils.scryRenderedDOMComponentsWithTag(buttons[0], 'i');
+
+                expect(buttons.length).toBe(2);
+                expect(iconsAll.length).toBe(2);
+                expect(iconsAll[0].getAttribute('class')).toBe('glyphicon glyphicon-chevron-left');
+                expect(iconsAll[1].getAttribute('class')).toBe('glyphicon glyphicon-list');
+                expect(icons.length).toBe(1);
+                expect(icons[0].getAttribute('class')).toBe('glyphicon glyphicon-chevron-left');
+                expect(filterBox).toBeDefined();
+                expect(selectBox).toBeDefined();
+                expect(selectBox.options.length).toBe(itemLength);
+            });
+        });
+
+        describe('1 button,', () => {
+            beforeEach(() => {
+                listBox = ReactTestUtils.renderIntoDocument(
+                    <ListBox 
+                        direction="left"
+                        title= "A Title"
+                        moveAllBtn= { false }
+                        onMove= { onMove }
+                        text= "name"
+                        source= { items }
+                        value= "id" />
+                );
+            });
+
+            it('should render a left directed listbox', () => {
+                expect(listBox).toBeDefined();
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+                var icons = ReactTestUtils.scryRenderedDOMComponentsWithTag(buttons[0], 'i');
+
+                expect(buttons.length).toBe(1);
+                expect(icons.length).toBe(1);
+                expect(icons[0].getAttribute('class')).toBe('glyphicon glyphicon-chevron-left');
                 expect(filterBox).toBeDefined();
                 expect(selectBox).toBeDefined();
                 expect(selectBox.options.length).toBe(itemLength);
