@@ -117,7 +117,7 @@ var DualListBox = React.createClass({
         return (
             <div className="form-group row">
                 <ListBox 
-                    ref="right"
+                    ref="source"
                     title={this.props.sourceTitle}
                     source={this.state.sourceData}
                     moveAllBtn={this.props.moveAllBtn}
@@ -129,7 +129,7 @@ var DualListBox = React.createClass({
                     height={this.props.height}
                     direction="right" />
                 <ListBox
-                    ref="left"
+                    ref="destination"
                     title={this.props.destinationTitle}
                     source={this.state.destinationData}
                     moveAllBtn={this.props.moveAllBtn}

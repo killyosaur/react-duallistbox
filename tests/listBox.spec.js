@@ -263,80 +263,7 @@ describe('ListBox:', () => {
         });
     });
 
-    describe('onClickAll', () => {
-        beforeEach(() => {
-            listBox = ReactTestUtils.renderIntoDocument(
-                <ListBox 
-                    direction="right"
-                    title= "A Title"
-                    moveAllBtn= { true }
-                    onMove= { onMove }
-                    text= "name"
-                    source= { items }
-                    value= "id" />
-            );
-        });
-
-       it('should fire the onMove function with all data', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
-
-            expect(selectBox.options.length).toBe(itemLength);
-            ReactTestUtils.Simulate.click(buttonToClick);
-
-            expect(onMove).toHaveBeenCalledWith(items);
-            expect(selectBox.options.length).toBe(0);
-            expect(items.length).toBe(itemLength);
-        });
-
-        it('should fire the onMove function with filtered data', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
-            var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
-
-            var expected = listBox.filterData('Bang');
-            var node = filterBox.refs.filter;
-            node.input = 'Bang';
-            ReactTestUtils.Simulate.change(node);
-            expect(buttonToClick.getAttribute('disabled')).toBeNull();
-
-            expect(selectBox.options.length).toBe(expected.length);
-            ReactTestUtils.Simulate.click(buttonToClick);
-
-            expect(onMove).toHaveBeenCalledWith(expected);
-            expect(selectBox.options.length).toBe(0);
-            expect(items.length).toBe(itemLength);
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-        });
-
-        it('should not fire the onMove function as filter removes all data', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
-            var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
-
-            expect(buttonToClick.getAttribute('disabled')).toBeNull();
-            var expected = listBox.filterData('test');
-            var node = filterBox.refs.filter;
-            node.input = 'test';
-            ReactTestUtils.Simulate.change(node);
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-
-            expect(selectBox.options.length).toBe(expected.length);
-            ReactTestUtils.Simulate.click(buttonToClick);
-
-            expect(onMove).not.toHaveBeenCalled();
-            expect(selectBox.options.length).toBe(0);
-            expect(items.length).toBe(itemLength);
-        });
-    });
-
-    describe('onClick', () => {
+    describe('move data:', () => {
         var container;
         beforeEach(() => {
             onMove = jasmine.createSpy('onMove').and.callFake(function(results) {
@@ -366,24 +293,100 @@ describe('ListBox:', () => {
             );
         });
 
-       it('should not fire the onMove function as no items selected', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+        describe('onClickAll', () => {
+            it('should fire the onMove function with all data', () => {
+                expect(items.length).toBe(itemLength);
+                var currentItems = [].concat(items);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
 
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-            expect(selectBox.options.length).toBe(itemLength);
-            ReactTestUtils.Simulate.click(buttonToClick);
+                expect(selectBox.options.length).toBe(itemLength);
+                ReactTestUtils.Simulate.click(buttonToClick);
 
-            expect(onMove).not.toHaveBeenCalled();
-            expect(selectBox.options.length).toBe(itemLength);
-            expect(items.length).toBe(itemLength);
+                expect(onMove).toHaveBeenCalledWith(currentItems);
+                expect(selectBox.options.length).toBe(0);
+                expect(items.length).toBe(0);
+            });
+
+            it('should fire the onMove function with filtered data', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
+                var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                var expected = listBox.filterData('Bang');
+                var node = filterBox.refs.filter;
+                node.input = 'Bang';
+                ReactTestUtils.Simulate.change(node);
+                expect(buttonToClick.getAttribute('disabled')).toBeNull();
+
+                expect(selectBox.options.length).toBe(expected.length);
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(onMove).toHaveBeenCalledWith(expected);
+                expect(selectBox.options.length).toBe(0);
+                expect(items.length).toBe(itemLength - expected.length);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+            });
+
+            it('should not fire the onMove function as filter removes all data', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[0], 'button');
+                var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                expect(buttonToClick.getAttribute('disabled')).toBeNull();
+                var expected = listBox.filterData('test');
+                var node = filterBox.refs.filter;
+                node.input = 'test';
+                ReactTestUtils.Simulate.change(node);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+
+                expect(selectBox.options.length).toBe(expected.length);
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(onMove).not.toHaveBeenCalled();
+                expect(selectBox.options.length).toBe(0);
+                expect(items.length).toBe(itemLength);
+            });
         });
 
-       it('should not fire the onMove function as buttons are disabled', () => {
-            onMove = jasmine.createSpy('onMove').and.callFake(function(results) {
-                items = removeSelectedItems(items, results, 'id');
+        describe('onClick', () => {
+            it('should not fire the onMove function as no items selected', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(selectBox.options.length).toBe(itemLength);
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(onMove).not.toHaveBeenCalled();
+                expect(selectBox.options.length).toBe(itemLength);
+                expect(items.length).toBe(itemLength);
+            });
+
+            it('should not fire the onMove function as buttons are disabled', () => {
+                onMove = jasmine.createSpy('onMove').and.callFake(function(results) {
+                    items = removeSelectedItems(items, results, 'id');
+                    listBox = ReactDOM.render(
+                        <ListBox 
+                            direction="right"
+                            title= "A Title"
+                            moveAllBtn= { true }
+                            onMove= { onMove }
+                            text= "name"
+                            disable={true}
+                            source= { items }
+                            value= "id" />, container
+                    );
+                });
+
+                container = document.createElement('div');
                 listBox = ReactDOM.render(
                     <ListBox 
                         direction="right"
@@ -395,126 +398,143 @@ describe('ListBox:', () => {
                         source= { items }
                         value= "id" />, container
                 );
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(selectBox.options.length).toBe(itemLength);
+
+                var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+                var expected = [];
+                for (var i = 0; i < indices.length; i++) {
+                    if (expected.indexOf(items[indices[i]]) === -1) {
+                        expected.push(items[indices[i]]);
+                        selectBox.options[indices[i]].selected = true;
+                    }
+                }
+                ReactTestUtils.Simulate.change(selectBox);
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(onMove).not.toHaveBeenCalled();
+                expect(selectBox.options.length).toBe(itemLength);
+                expect(items.length).toBe(itemLength);
             });
 
-            container = document.createElement('div');
-            listBox = ReactDOM.render(
-                <ListBox 
-                    direction="right"
-                    title= "A Title"
-                    moveAllBtn= { true }
-                    onMove= { onMove }
-                    text= "name"
-                    disable={true}
-                    source= { items }
-                    value= "id" />, container
-            );
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+            it('should fire the onMove function with selected data', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
 
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-            expect(selectBox.options.length).toBe(itemLength);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(selectBox.options.length).toBe(itemLength);
 
-            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
-            var expected = [];
-            for (var i = 0; i < indices.length; i++) {
-                if (expected.indexOf(items[indices[i]]) === -1) {
-                    expected.push(items[indices[i]]);
+                var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+                var expected = [];
+                for (var i = 0; i < indices.length; i++) {
+                    if (expected.indexOf(items[indices[i]]) === -1) {
+                        expected.push(items[indices[i]]);
+                        selectBox.options[indices[i]].selected = true;
+                    }
+                }
+                ReactTestUtils.Simulate.change(selectBox);
+
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
+                expect(selectBox.options.length).toBe(itemLength - expected.length);
+                expect(items.length).toBe(itemLength - expected.length);
+            });
+
+            it('should clear all selected data and selected options', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(selectBox.options.length).toBe(itemLength);
+
+                var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+                var expected = [];
+                for (var i = 0; i < indices.length; i++) {
+                    if (expected.indexOf(items[indices[i]]) === -1) {
+                        expected.push(items[indices[i]]);
+                        selectBox.options[indices[i]].selected = true;
+                    }
+                }
+                ReactTestUtils.Simulate.change(selectBox);
+
+                ReactTestUtils.Simulate.click(buttonToClick);
+
+                expect(selectBox.options.length).toBe(itemLength - expected.length);
+                for (var j = 0; j < selectBox.options.length; j++) {
+                    expect(selectBox.options[j].selected).toBeFalsy();
+                }
+
+                expect(listBox.state.selected.length).toBe(0);
+                expect(items.length).toBe(itemLength - expected.length);
+            });
+
+            it('should disable the select move button when all data deselected', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(selectBox.options.length).toBe(itemLength);
+
+                var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
+                var i;
+                for (i = 0; i < indices.length; i++) {
                     selectBox.options[indices[i]].selected = true;
                 }
-            }
-            ReactTestUtils.Simulate.change(selectBox);
-            ReactTestUtils.Simulate.click(buttonToClick);
+                ReactTestUtils.Simulate.change(selectBox);
+                expect(buttonToClick.getAttribute('disabled')).toBeNull();
 
-            expect(onMove).not.toHaveBeenCalled();
-            expect(selectBox.options.length).toBe(itemLength);
-            expect(items.length).toBe(itemLength);
-        });
-
-       it('should fire the onMove function with selected data', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
-
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-            expect(selectBox.options.length).toBe(itemLength);
-
-            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
-            var expected = [];
-            for (var i = 0; i < indices.length; i++) {
-                if (expected.indexOf(items[indices[i]]) === -1) {
-                    expected.push(items[indices[i]]);
-                    selectBox.options[indices[i]].selected = true;
+                for (i = 0; i < indices.length; i++) {
+                    selectBox.options[indices[i]].selected = false;
                 }
-            }
-            ReactTestUtils.Simulate.change(selectBox);
+                ReactTestUtils.Simulate.change(selectBox);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+            });
 
-            ReactTestUtils.Simulate.click(buttonToClick);
+            it('should fire the onMove function with filtered and selected data', () => {
+                expect(items.length).toBe(itemLength);
+                var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
+                var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
+                var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
+                var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
 
-            expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
-            expect(selectBox.options.length).toBe(itemLength - expected.length);
-            expect(items.length).toBe(itemLength - expected.length);
-        });
+                var expectedFiltered = listBox.filterData('Bang');
+                var indices = JSC.array(5, JSC.integer(0, expectedFiltered.length - 1))();
+                var node = filterBox.refs.filter;
+                node.input = 'Bang';
+                ReactTestUtils.Simulate.change(node);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
 
-       it('should disable the select move button when all data deselected', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
+                expect(selectBox.options.length).toBe(expectedFiltered.length);
 
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-            expect(selectBox.options.length).toBe(itemLength);
-
-            var indices = JSC.array(25, JSC.integer(0, itemLength - 1))();
-            var i;
-            for (i = 0; i < indices.length; i++) {
-                selectBox.options[indices[i]].selected = true;
-            }
-            ReactTestUtils.Simulate.change(selectBox);
-            expect(buttonToClick.getAttribute('disabled')).toBeNull();
-
-            for (i = 0; i < indices.length; i++) {
-                selectBox.options[indices[i]].selected = false;
-            }
-            ReactTestUtils.Simulate.change(selectBox);
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-        });
-
-        it('should fire the onMove function with filtered and selected data', () => {
-            expect(items.length).toBe(itemLength);
-            var buttons = ReactTestUtils.scryRenderedComponentsWithType(listBox, ButtonComponent);
-            var buttonToClick = ReactTestUtils.findRenderedDOMComponentWithTag(buttons[1], 'button');
-            var filterBox = ReactTestUtils.findRenderedComponentWithType(listBox, FilterBox);
-            var selectBox = ReactTestUtils.findRenderedDOMComponentWithTag(listBox, 'select');
-
-            var expectedFiltered = listBox.filterData('Bang');
-            var indices = JSC.array(5, JSC.integer(0, expectedFiltered.length - 1))();
-            var node = filterBox.refs.filter;
-            node.input = 'Bang';
-            ReactTestUtils.Simulate.change(node);
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
-
-            expect(selectBox.options.length).toBe(expectedFiltered.length);
-
-            var expected = [];
-            for (var i = 0; i < indices.length; i++) {
-                if (expected.indexOf(expectedFiltered[indices[i]]) === -1) {
-                    expected.push(expectedFiltered[indices[i]]);
-                    selectBox.options[indices[i]].selected = true;
+                var expected = [];
+                for (var i = 0; i < indices.length; i++) {
+                    if (expected.indexOf(expectedFiltered[indices[i]]) === -1) {
+                        expected.push(expectedFiltered[indices[i]]);
+                        selectBox.options[indices[i]].selected = true;
+                    }
                 }
-            }
-            ReactTestUtils.Simulate.change(selectBox);
-            expect(buttonToClick.getAttribute('disabled')).toBeNull();
+                ReactTestUtils.Simulate.change(selectBox);
+                expect(buttonToClick.getAttribute('disabled')).toBeNull();
 
-            ReactTestUtils.Simulate.click(buttonToClick);
+                ReactTestUtils.Simulate.click(buttonToClick);
 
-            expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
-            expect(selectBox.options.length).toBe(expectedFiltered.length - expected.length);
-            expect(items.length).toBe(itemLength - expected.length);
-            expect(buttonToClick.getAttribute('disabled')).toBe('');
+                expect(onMove).toHaveBeenCalledWith(expected.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1 ));
+                expect(selectBox.options.length).toBe(expectedFiltered.length - expected.length);
+                expect(items.length).toBe(itemLength - expected.length);
+                expect(buttonToClick.getAttribute('disabled')).toBe('');
+            });
         });
     });
 

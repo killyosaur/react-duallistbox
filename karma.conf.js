@@ -129,6 +129,9 @@ module.exports = function(config) {
 	},
     webpackServer: {
         noInfo: true
-    }
+    },
+    browserDisconnectTimeout: 30000,
+    captureTimeout: 100000,
+    browserNoActivityTimeout: 60000
   })
 }

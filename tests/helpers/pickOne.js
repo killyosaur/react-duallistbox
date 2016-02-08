@@ -11,6 +11,8 @@ var pickOne = function() {
         "Amelia","Jessica","Sophia","Ava","Charlotte","Mia","Lucy","Grace","Ruby",
         "Ella","Evie","Freya","Isla","Poppy","Daisy","Layla", "Michael", "Jacob", "Douglas",
         "Terry", "Gillian", "David", "Marc", "Tim", "Steve", "Jeff"];
+    var middleInitial = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+    var suffix = [' Jr.', '', ' Sr.', ' I', ' II', ' III', ' IV', 'Ph.D'];
     var lastNames = ["Beckham","Black","Braxton","Brennan","Brock","Bryson","Cadwell",
         "Cage","Carson","Chandler","Cohen","Cole","Corbin","Dallas","Dalton","Dane",
         "Donovan","Easton","Fisher","Fletcher","Grady","Greyson","Griffin","Gunner",
@@ -22,7 +24,9 @@ var pickOne = function() {
     for (var row = 1; row <= 10000; row++) {
         var val = "";
         val += firstNames[row % firstNames.length] + " ";
+        val += middleInitial[row % middleInitial.length] + ' ';
         val += lastNames[row % lastNames.length] + ", ";
+        val += suffix[row % suffix.length] + ' ';
         val += games[row % games.length];
         data.push(val);
     }

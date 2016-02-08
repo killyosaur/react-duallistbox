@@ -40,7 +40,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData.sort((a, b) => a.name.localeCompare(b.name))}
                         moveAllBtn={true}
@@ -52,7 +52,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -130,7 +130,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData.sort((a, b) => a.id === b.id ? 0 : a.id > b.id ? 1 : -1)}
                         moveAllBtn={true}
@@ -142,7 +142,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -167,7 +167,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData.sort((a, b) => a.name.localeCompare(b.name))}
                         moveAllBtn={true}
@@ -179,7 +179,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -204,7 +204,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData.sort((a, b) => a.name.localeCompare(b.name))}
                         moveAllBtn={true}
@@ -216,7 +216,7 @@ describe('DualListBox:', () => {
                         height="150vh"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -241,7 +241,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Data to Pick from"
                         source={sourceData.sort((a, b) => a.name.localeCompare(b.name))}
                         moveAllBtn={true}
@@ -253,7 +253,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Data you picked"
                         source={destinationData}
                         moveAllBtn={true}
@@ -278,7 +278,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData}
                         moveAllBtn={true}
@@ -290,7 +290,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -327,7 +327,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={expectedSource}
                         moveAllBtn={true}
@@ -339,7 +339,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -364,7 +364,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData}
                         moveAllBtn={true}
@@ -376,7 +376,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}
@@ -409,7 +409,7 @@ describe('DualListBox:', () => {
             expect(result.props.children)
                 .toEqual([
                     <ListBox
-                        ref="right"
+                        ref="source"
                         title="Available Items"
                         source={sourceData}
                         moveAllBtn={true}
@@ -421,7 +421,7 @@ describe('DualListBox:', () => {
                         height="300px"
                         direction="right" />,
                     <ListBox
-                        ref="left"
+                        ref="destination"
                         title="Selected Items"
                         source={destinationData}
                         moveAllBtn={true}

@@ -180,7 +180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            'div',
 	            { className: 'form-group row' },
 	            React.createElement(ListBox, {
-	                ref: 'right',
+	                ref: 'source',
 	                title: this.props.sourceTitle,
 	                source: this.state.sourceData,
 	                moveAllBtn: this.props.moveAllBtn,
@@ -192,7 +192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                height: this.props.height,
 	                direction: 'right' }),
 	            React.createElement(ListBox, {
-	                ref: 'left',
+	                ref: 'destination',
 	                title: this.props.destinationTitle,
 	                source: this.state.destinationData,
 	                moveAllBtn: this.props.moveAllBtn,
@@ -258,25 +258,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var filteredData = this.filterData(this.state.filter, nextProps.source);
 	            this.setState({
 	                filteredData: filteredData,
-	                onClickAllDisabled: this.props.disable || filteredData.length === 0
+	                onClickAllDisabled: this.props.disable || filteredData.length === 0,
+	                selected: [],
+	                onClickDisabled: true
 	            });
 	        }
 	    },
 	    onClickAll: function onClickAll(event) {
+	        this.deselectItems();
 	        this.props.onMove(this.state.filteredData);
-	        this.setState({
-	            selected: [],
-	            filteredData: [],
-	            onClickDisabled: true,
-	            onClickAllDisabled: true
-	        });
 	    },
 	    onClick: function onClick(event) {
+	        this.deselectItems();
 	        this.props.onMove(this.state.selected);
-	        this.setState({
-	            selected: [],
-	            onClickDisabled: true
-	        });
+	    },
+	    deselectItems: function deselectItems() {
+	        for (var i = 0; i < this.state.selected.length; i++) {
+	            this.refs.select.options[this.state.selected[i].optionId].selected = false;
+	        }
 	    },
 	    handleFilterChange: function handleFilterChange(event) {
 	        var filter = '';
@@ -286,7 +285,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            filter = event.target.value;
 	        }
 
+	        this.deselectItems();
 	        var result = this.filterData(filter);
+
 	        this.setState({
 	            filter: filter,
 	            filteredData: result,
@@ -301,13 +302,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var selectedValues = [],
 	            disable = this.props.disable;
 	        var select = this.refs.select || event.target;
+
 	        for (var i = 0, l = select.options.length; i < l; i++) {
 	            if (select.options[i].selected) {
-	                var itemId = parseInt(select.options[i].value);
+	                var itemValue = select.options[i].value;
+
 	                var item = this.props.source.filter(function (v) {
-	                    return v[_this.props.value] === itemId;
+	                    return v[_this.props.value] == itemValue;
 	                });
 	                if (item.length > 0) {
+	                    item[0].optionId = i;
 	                    selectedValues.push(item[0]);
 	                }
 	            }

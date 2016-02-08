@@ -35,25 +35,24 @@ var ListBox = React.createClass({
             var filteredData = this.filterData(this.state.filter, nextProps.source);
             this.setState({
                 filteredData: filteredData,
-                onClickAllDisabled: this.props.disable || filteredData.length === 0
+                onClickAllDisabled: this.props.disable || filteredData.length === 0,
+                selected: [],
+                onClickDisabled: true
             });
         }
     },
     onClickAll: function(event) {
+        this.deselectItems();
         this.props.onMove(this.state.filteredData);
-        this.setState({
-            selected: [],
-            filteredData: [],
-            onClickDisabled: true,
-            onClickAllDisabled: true
-        });
     },
     onClick: function(event) {
+        this.deselectItems();
         this.props.onMove(this.state.selected);
-        this.setState({
-            selected: [],
-            onClickDisabled: true
-        });
+    },
+    deselectItems: function() {
+        for(var i = 0; i < this.state.selected.length; i++) {
+            this.refs.select.options[this.state.selected[i].optionId].selected = false;
+        }
     },
     handleFilterChange: function(event) {
         var filter = '';
@@ -63,7 +62,9 @@ var ListBox = React.createClass({
             filter = event.target.value;
         }
 
+        this.deselectItems();
         var result = this.filterData(filter);
+
         this.setState({
             filter: filter,
             filteredData: result,
@@ -75,11 +76,14 @@ var ListBox = React.createClass({
     handleSelectChange: function(event) {
         var selectedValues = [], disable = this.props.disable;
         var select = this.refs.select || event.target;
+
         for (var i = 0, l = select.options.length; i < l; i++) {
             if (select.options[i].selected) {
-                var itemId = parseInt(select.options[i].value);
-                var item = this.props.source.filter(v => v[this.props.value] === itemId);
+                var itemValue = select.options[i].value;
+
+                var item = this.props.source.filter(v => v[this.props.value] == itemValue);
                 if (item.length > 0) {
+                    item[0].optionId = i;
                     selectedValues.push(item[0]);
                 }
             }
