@@ -1,3 +1,9 @@
+/*!
+ * react-duallistbox - a dual list box for selecting and moving data using react
+ * @version v0.1.0
+ * @link https://github.com/killyosaur/react-duallistbox#readme
+ * @license CC-BY-SA-4.0
+ */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory(require("react"));
@@ -60,58 +66,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var PropTypes = React.PropTypes;
 	var ListBox = __webpack_require__(2);
 
-	function removeData(destinationData, dataToRemove, options) {
-	    var dataToReturn = [];
-	    for (var x = 0; x < destinationData.length; x++) {
-	        var index = getIndex(dataToRemove, destinationData[x], options);
-	        if (index === -1) {
-	            dataToReturn.push(destinationData[x]);
-	        }
-	    }
-
-	    return dataToReturn;
-	}
-
-	function getIndex(data, item, options) {
-	    var ind = 0,
-	        length = data.length;
-	    if (!data || data.length === 0) return -1;
-
-	    if (item.hasOwnProperty(options.value)) {
-	        for (; ind < length; ind++) {
-	            if (data[ind][options.value] === item[options.value]) {
-	                return ind;
-	            }
-	        }
-	    } else {
-	        for (; ind < length; ind++) {
-	            var isEqual = false;
-	            for (var j in item) {
-	                if (data[ind].hasOwnProperty(j) && item.hasOwnProperty(j)) {
-	                    isEqual = data[ind][j] === item[j];
-	                }
-	            }
-	            if (isEqual) {
-	                return ind;
-	            }
-	        }
-	    }
-	    return -1;
-	}
-
-	function setOptions(optionState, props) {
-	    for (var i in optionState) {
-	        optionState[i] = props[i] ? props[i] : optionState[i];
-	    }
-
-	    return optionState;
-	}
-
 	var DualListBox = React.createClass({
 	    displayName: 'DualListBox',
 	    propTypes: {
-	        text: PropTypes.string,
-	        value: PropTypes.string,
+	        text: PropTypes.string.isRequired,
+	        value: PropTypes.string.isRequired,
 	        sourceTitle: PropTypes.string,
 	        destinationTitle: PropTypes.string,
 	        timeout: PropTypes.number,
@@ -127,46 +86,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	    getInitialState: function getInitialState() {
 	        return {
 	            sourceData: [],
-	            destinationData: [],
-	            options: {
-	                text: 'name', // Text that is assigned to the option field.
-	                value: 'id', // Optional Value field, will create a standard list box by value.
-	                sourceTitle: 'Available Items', // Title of the source list of the dual list box.
-	                destinationTitle: 'Selected Items', // Title of the destination list of the dual list box.
-	                timeout: 500, // Timeout for when a filter search is started.
-	                textLength: 45, // Maximum text length that is displayed in the select.
-	                moveAllBtn: true, // Whether the append all button is available.
-	                maxAllBtn: 500, // Maximum size of list in which the all button works without warning. See below.
-	                height: '300px',
-	                sortBy: 'name',
-	                warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
-	            }
+	            destinationData: []
 	        };
 	    },
-	    componentDidMount: function componentDidMount() {
-	        var options = setOptions(this.state.options, this.props);
-
-	        var sourceData = removeData(this.props.source, this.props.destination, options);
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            text: 'name', // Text that is assigned to the option field.
+	            value: 'id', // Optional Value field, will create a standard list box by value.
+	            sourceTitle: 'Available Items', // Title of the source list of the dual list box.
+	            destinationTitle: 'Selected Items', // Title of the destination list of the dual list box.
+	            timeout: 500, // Timeout for when a filter search is started.
+	            textLength: 45, // Maximum text length that is displayed in the select.
+	            moveAllBtn: true, // Whether the append all button is available.
+	            maxAllBtn: 500, // Maximum size of list in which the all button works without warning. See below.
+	            height: '300px',
+	            sortBy: 'name',
+	            warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
+	        };
+	    },
+	    componentWillMount: function componentWillMount() {
+	        var sourceData = this.removeData(this.props.source, this.props.destination).sort(this.compare);
 
 	        this.setState({
 	            sourceData: sourceData,
-	            destinationData: this.props.destination,
-	            options: options
+	            destinationData: this.props.destination.sort(this.compare)
 	        });
 	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        var sourceData = this.removeData(nextProps.source, nextProps.destination).sort(this.compare);
+
+	        this.setState({
+	            sourceData: sourceData,
+	            destinationData: nextProps.destination.sort(this.compare)
+	        });
+	    },
+	    removeData: function removeData(destinationData, dataToRemove) {
+	        var dataToReturn = [];
+	        for (var x = 0; x < destinationData.length; x++) {
+	            var index = this.getIndex(dataToRemove, destinationData[x]);
+	            if (index === -1) {
+	                dataToReturn.push(destinationData[x]);
+	            }
+	        }
+
+	        return dataToReturn;
+	    },
+	    getIndex: function getIndex(data, item) {
+	        var ind = 0,
+	            length = data.length;
+	        if (!data || data.length === 0) return -1;
+
+	        for (; ind < length; ind++) {
+	            if (data[ind][this.props.value] === item[this.props.value]) {
+	                return ind;
+	            }
+	        }
+
+	        return -1;
+	    },
 	    compare: function compare(a, b) {
-	        if (a[this.state.options.sortBy] > b[this.state.options.sortBy]) {
-	            return 1;
+	        if (typeof a[this.props.sortBy] === 'string' && typeof b[this.props.sortBy] === 'string') {
+	            return a[this.props.sortBy].localeCompare(b[this.props.sortBy]);
 	        }
-	        if (a[this.state.options.sortBy] < b[this.state.options.sortBy]) {
-	            return -1;
-	        }
-	        return 0;
+
+	        return a[this.props.sortBy] === b[this.props.sortBy] ? 0 : a[this.props.sortBy] > b[this.props.sortBy] ? 1 : -1;
 	    },
 	    moveLeft: function moveLeft(itemsToMove) {
-	        var destination = removeData(this.state.destinationData, itemsToMove, this.state.options);
+	        var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
+	        var destination = this.removeData(this.state.destinationData, itemsToMove);
 	        this.setState({
-	            sourceData: this.state.sourceData.concat(itemsToMove).sort(this.compare),
+	            sourceData: source,
 	            destinationData: destination
 	        });
 
@@ -175,7 +164,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }
 	    },
 	    moveRight: function moveRight(itemsToMove) {
-	        var source = removeData(this.state.sourceData, itemsToMove, this.state.options);
+	        var source = this.removeData(this.state.sourceData, itemsToMove);
 	        var destination = this.state.destinationData.concat(itemsToMove).sort(this.compare);
 	        this.setState({
 	            sourceData: source,
@@ -191,28 +180,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	            'div',
 	            { className: 'form-group row' },
 	            React.createElement(ListBox, {
-	                title: this.state.options.sourceTitle,
+	                ref: 'source',
+	                title: this.props.sourceTitle,
 	                source: this.state.sourceData,
-	                moveAll: this.state.options.moveAllBtn,
+	                moveAllBtn: this.props.moveAllBtn,
 	                onMove: this.moveRight,
-	                textLength: this.state.options.textLength,
-	                onChange: this.itemsMoved,
-	                text: this.state.options.text,
-	                value: this.state.options.value,
+	                textLength: this.props.textLength,
+	                text: this.props.text,
+	                value: this.props.value,
 	                disable: this.props.disable,
-	                height: this.state.options.height,
+	                height: this.props.height,
 	                direction: 'right' }),
 	            React.createElement(ListBox, {
-	                title: this.state.options.destinationTitle,
+	                ref: 'destination',
+	                title: this.props.destinationTitle,
 	                source: this.state.destinationData,
-	                moveAll: this.state.options.moveAllBtn,
+	                moveAllBtn: this.props.moveAllBtn,
 	                onMove: this.moveLeft,
-	                textLength: this.state.options.textLength,
-	                onChange: this.itemsMoved,
-	                text: this.state.options.text,
-	                value: this.state.options.value,
+	                textLength: this.props.textLength,
+	                text: this.props.text,
+	                value: this.props.value,
 	                disable: this.props.disable,
-	                height: this.state.options.height,
+	                height: this.props.height,
 	                direction: 'left' })
 	        );
 	    }
@@ -235,17 +224,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	var React = __webpack_require__(1);
 	var PropTypes = React.PropTypes;
 	var ButtonComponent = __webpack_require__(3);
-	var ButtonAllComponent = __webpack_require__(4);
+	var FilterBox = __webpack_require__(4);
 
 	var ListBox = React.createClass({
 	    displayName: 'ListBox',
 	    propTypes: {
 	        title: PropTypes.string.isRequired,
 	        source: PropTypes.arrayOf(PropTypes.object).isRequired,
-	        moveAll: PropTypes.bool.isRequired,
+	        moveAllBtn: PropTypes.bool.isRequired,
 	        onMove: PropTypes.func.isRequired,
 	        textLength: PropTypes.number,
-	        onChange: PropTypes.func.isRequired,
 	        text: PropTypes.string.isRequired,
 	        value: PropTypes.string.isRequired,
 	        direction: PropTypes.string.isRequired
@@ -254,104 +242,148 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return {
 	            selected: [],
 	            filter: '',
-	            filteredData: []
+	            filteredData: [],
+	            onClickDisabled: true,
+	            onClickAllDisabled: true
 	        };
 	    },
-	    onClickAll: function onClickAll(event) {
-	        this.props.onMove(this.state.filteredData);
+	    componentWillMount: function componentWillMount() {
 	        this.setState({
-	            selected: [],
-	            filteredData: []
+	            filteredData: this.props.source,
+	            onClickAllDisabled: this.props.disable || this.props.source.length === 0
 	        });
+	    },
+	    componentWillReceiveProps: function componentWillReceiveProps(nextProps) {
+	        if (this.props.source !== nextProps.source) {
+	            var filteredData = this.filterData(this.state.filter, nextProps.source);
+	            this.setState({
+	                filteredData: filteredData,
+	                onClickAllDisabled: this.props.disable || filteredData.length === 0,
+	                selected: [],
+	                onClickDisabled: true
+	            });
+	        }
+	    },
+	    onClickAll: function onClickAll(event) {
+	        this.deselectItems();
+	        this.props.onMove(this.state.filteredData);
 	    },
 	    onClick: function onClick(event) {
+	        this.deselectItems();
 	        this.props.onMove(this.state.selected);
-	        this.setState({
-	            selected: []
-	        });
+	    },
+	    deselectItems: function deselectItems() {
+	        for (var i = 0; i < this.state.selected.length; i++) {
+	            this.refs.select.options[this.state.selected[i].optionId].selected = false;
+	        }
 	    },
 	    handleFilterChange: function handleFilterChange(event) {
-	        var result = this.filteredData(event.target.value);
+	        var filter = '';
+	        if (this.filterBox !== null) {
+	            filter = this.filterBox.refs.filter.input || event.target.value;
+	        } else {
+	            filter = event.target.value;
+	        }
+
+	        this.deselectItems();
+	        var result = this.filterData(filter);
+
 	        this.setState({
-	            filter: event.target.value,
-	            filteredData: result
+	            filter: filter,
+	            filteredData: result,
+	            selected: [],
+	            onClickDisabled: true,
+	            onClickAllDisabled: this.props.disable || result.length === 0
 	        });
 	    },
 	    handleSelectChange: function handleSelectChange(event) {
-	        var selectedValues = [];
-	        for (var i = 0, l = event.target.options.length; i < l; i++) {
-	            if (event.target.options[i].selected) {
-	                selectedValues.push(event.target.options[i]);
+	        var _this = this;
+
+	        var selectedValues = [],
+	            disable = this.props.disable;
+	        var select = this.refs.select || event.target;
+
+	        for (var i = 0, l = select.options.length; i < l; i++) {
+	            if (select.options[i].selected) {
+	                var itemValue = select.options[i].value;
+
+	                var item = this.props.source.filter(function (v) {
+	                    return v[_this.props.value] == itemValue;
+	                });
+	                if (item.length > 0) {
+	                    item[0].optionId = i;
+	                    selectedValues.push(item[0]);
+	                }
 	            }
 	        }
+
+	        if (!disable && selectedValues.length === 0) {
+	            disable = true;
+	        }
+
 	        this.setState({
-	            selected: selectedValues
+	            selected: selectedValues,
+	            onClickDisabled: disable
 	        });
-	    },
-	    disabled: function disabled(sourceLength) {
-	        return this.props.disable || sourceLength === 0;
 	    },
 	    buttons: function buttons() {
 	        var btnNodes = [];
-	        var btn = function btn(thisArg) {
+	        var btn = function btn(thisArg, classes, func, key) {
 	            return React.createElement(ButtonComponent, {
-	                key: 's-' + thisArg.props.direction,
-	                moveAll: thisArg.props.moveAll,
-	                click: thisArg.onClick,
-	                direction: thisArg.props.direction,
-	                disable: thisArg.disabled(thisArg.state.selected.length) });
+	                key: key,
+	                click: thisArg[func],
+	                width: thisArg.props.moveAllBtn ? 6 : 12,
+	                disable: thisArg.state[func + 'Disabled'],
+	                classes: classes });
 	        };
 
-	        var btnAll = function btnAll(thisArg) {
-	            return React.createElement(ButtonAllComponent, {
-	                key: 'a-' + thisArg.props.direction,
-	                click: thisArg.onClickAll,
-	                direction: thisArg.props.direction,
-	                disable: thisArg.disabled(thisArg.state.filteredData.length) });
-	        };
+	        var chevron = 'glyphicon-chevron-' + this.props.direction.toLowerCase();
 
 	        switch (this.props.direction.toLowerCase()) {
 	            case 'right':
-	                if (this.props.moveAll === true) {
-	                    btnNodes.push(btnAll(this));
+	                if (this.props.moveAllBtn === true) {
+	                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll', 1));
 	                }
-	                btnNodes.push(btn(this));
+	                btnNodes.push(btn(this, [chevron], 'onClick', 2));
 	                break;
 	            case 'left':
-	                btnNodes.push(btn(this));
-	                if (this.props.moveAll === true) {
-	                    btnNodes.push(btnAll(this));
+	                btnNodes.push(btn(this, [chevron], 'onClick', 3));
+	                if (this.props.moveAllBtn === true) {
+	                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll', 4));
 	                }
 	                break;
 	        }
 
 	        return btnNodes;
 	    },
-	    filteredData: function filteredData(filter) {
+	    filterData: function filterData(filter, source) {
+	        var _this2 = this;
+
+	        var source = source || this.props.source;
 	        if (filter === '' || filter === undefined) {
-	            return this.props.source;
+	            return source;
 	        }
 
-	        var result = this.props.source.filter(function (v) {
-	            return v[this.props.text].indexOf(filter) > -1;
-	        }, this);
+	        var result = source.filter(function (v) {
+	            return v[_this2.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1;
+	        });
 	        return result;
 	    },
 	    render: function render() {
-	        var sourceData = this.state.filteredData.length > 0 ? this.state.filteredData : this.props.source;
+	        var _this3 = this;
 
-	        var items = sourceData.map(function (item) {
-	            var text = item[this.props.text];
+	        var items = this.state.filteredData.map(function (item, index) {
+	            var text = item[_this3.props.text];
 	            return React.createElement(
 	                'option',
-	                { key: item[this.props.value], value: item[this.props.value] },
-	                this.props.textLength > 0 && text.length > this.props.textLength ? text.substring(0, this.props.textLength - 3) + '...' : text
+	                { key: index, value: item[_this3.props.value] },
+	                _this3.props.textLength > 0 && text.length > _this3.props.textLength ? text.substring(0, _this3.props.textLength - 3) + '...' : text
 	            );
 	        }, this);
 
 	        return React.createElement(
 	            'div',
-	            { className: 'col-md-6' },
+	            { className: 'col-sm-6' },
 	            React.createElement(
 	                'h4',
 	                null,
@@ -360,15 +392,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    'small',
 	                    null,
 	                    ' - showing ',
-	                    sourceData.length
+	                    this.state.filteredData.length
 	                )
 	            ),
-	            React.createElement('input', { style: { marginBottom: '5px' }, className: 'filter form-control',
-	                type: 'text', placeholder: 'Filter', onChange: this.handleFilterChange }),
+	            React.createElement(FilterBox, { handleFilterChange: this.handleFilterChange, ref: function ref(_ref) {
+	                    return _this3.filterBox = _ref;
+	                } }),
 	            this.buttons(),
 	            React.createElement(
 	                'select',
 	                {
+	                    ref: 'select',
 	                    style: { width: '100%', height: this.props.height || '200px' },
 	                    multiple: 'multiple',
 	                    onChange: this.handleSelectChange },
@@ -382,22 +416,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
+	var React = __webpack_require__(1);
+	var PropTypes = React.PropTypes;
+
 	var ButtonComponent = React.createClass({
 	    displayName: 'ButtonComponent',
-	    getClasses: function getClasses() {
-	        return this.props.moveAll ? 'col-md-6' : 'col-md-12';
+	    propTypes: {
+	        classes: PropTypes.arrayOf(PropTypes.string).isRequired,
+	        click: PropTypes.func,
+	        width: PropTypes.number.isRequired,
+	        disable: PropTypes.bool
+	    },
+	    getDefaultProps: function getDefaultProps() {
+	        return {
+	            width: 12,
+	            click: function click() {},
+	            classes: [],
+	            bool: false
+	        };
+	    },
+	    getIcons: function getIcons() {
+	        var icons = this.props.classes.map(function (c, index) {
+	            return React.createElement('i', { key: index, className: "glyphicon " + c });
+	        });
+
+	        return icons;
 	    },
 	    render: function render() {
-	        var btnPosition = this.getClasses();
 	        return React.createElement(
 	            'button',
-	            { className: "btn btn-default " + btnPosition, style: { marginBottom: '5px' },
-	                type: 'button', onClick: this.props.click },
-	            React.createElement('span', { className: "glyphicon glyphicon-chevron-" + this.props.direction.toLowerCase() })
+	            { className: "btn btn-default col-sm-" + this.props.width,
+	                style: { marginBottom: '5px' },
+	                type: 'button',
+	                onClick: this.props.click,
+	                disabled: this.props.disable },
+	            this.getIcons()
 	        );
 	    }
 	});
@@ -406,44 +463,25 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
-	var ButtonAllComponent = React.createClass({
-	    displayName: 'ButtonAllComponent',
+	var React = __webpack_require__(1);
+	var PropTypes = React.PropTypes;
+
+	var FilterBox = React.createClass({
+	    displayName: 'FilterBox',
+	    propTypes: {
+	        handleFilterChange: PropTypes.func.isRequired
+	    },
 	    render: function render() {
-	        var icons = [];
-	        var direction = this.props.direction.toLowerCase();
-	        function list() {
-	            return React.createElement('span', { key: '1', className: 'glyphicon glyphicon-list' });
-	        }
-
-	        function chevron(dir) {
-	            return React.createElement('span', { key: '0', className: "glyphicon glyphicon-chevron-" + dir });
-	        }
-
-	        switch (direction) {
-	            case 'right':
-	                icons.push(list());
-	                icons.push(chevron(direction));
-	                break;
-	            case 'left':
-	                icons.push(chevron(direction));
-	                icons.push(list());
-	                break;
-	        }
-
-	        return React.createElement(
-	            'button',
-	            { className: 'btn btn-default col-md-6', style: { marginBottom: '5px' },
-	                type: 'button', onClick: this.props.click },
-	            icons
-	        );
+	        return React.createElement('input', { style: { marginBottom: '5px' }, className: 'filter form-control', ref: 'filter',
+	            type: 'text', placeholder: 'Filter', onChange: this.props.handleFilterChange });
 	    }
 	});
 
-	module.exports = ButtonAllComponent;
+	module.exports = FilterBox;
 
 /***/ }
 /******/ ])

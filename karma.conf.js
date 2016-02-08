@@ -2,6 +2,26 @@
 // Generated on Mon Jan 25 2016 18:12:38 GMT-0500 (Eastern Standard Time)
 var webpack = require('webpack');
 var path = require('path');
+var singleRun = true;
+var browsers = ['Chrome'];
+var logLevel = 'LOG_INFO';
+var postLoaders = [
+    {
+        test: /\.jsx?$/,
+        exclude: /(tests|node_modules|bower_components)/,
+        loader: 'istanbul-instrumenter'
+    }
+];
+
+function isDebug(argument) {
+    return argument === '--debug';
+}
+if (process.argv.some(isDebug)) {
+    singleRun = false;
+    postLoaders = [];
+    browsers = ['Chrome'];
+    logLevel = 'LOG_DEBUG';
+}
 
 module.exports = function(config) {
   config.set({
@@ -25,6 +45,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
+        './tests/helpers/*.js',
         'tests.webpack.js'
     ],
 
@@ -64,7 +85,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config[logLevel],
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -73,12 +94,13 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['PhantomJS'],
+    //browsers: ['PhantomJS'],
+    browsers: browsers,
 
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
-    singleRun: true,
+    singleRun: singleRun,
 
     // Concurrency level
     // how many browser should be started simultaneous
@@ -90,13 +112,7 @@ module.exports = function(config) {
             loaders: [
                 { test: /\.jsx?$/, loader: 'babel-loader' }
             ],
-            postLoaders:[
-                {
-                    test: /\.jsx?$/,
-                    exclude: /(tests|node_modules|bower_components)/,
-                    loader: 'istanbul-instrumenter'
-                }
-            ]
+            postLoaders: postLoaders
         },
 		plugins: [
 			new webpack.ResolverPlugin([
@@ -113,6 +129,9 @@ module.exports = function(config) {
 	},
     webpackServer: {
         noInfo: true
-    }
+    },
+    browserDisconnectTimeout: 30000,
+    captureTimeout: 100000,
+    browserNoActivityTimeout: 60000
   })
 }

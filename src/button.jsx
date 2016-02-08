@@ -4,19 +4,36 @@ var PropTypes = React.PropTypes;
 var ButtonComponent = React.createClass({
     displayName: 'ButtonComponent',
     propTypes: {
-        direction: PropTypes.string.isRequired,
+        classes: PropTypes.arrayOf(PropTypes.string).isRequired,
         click: PropTypes.func,
-        moveAll: PropTypes.bool
+        width: PropTypes.number.isRequired,
+        disable: PropTypes.bool
     },
-    getClasses: function() {
-        return this.props.moveAll ? 'col-md-6' : 'col-md-12';
+    getDefaultProps: function() {
+        return {
+            width: 12,
+            click: function() {},
+            classes: [],
+            bool: false
+        }
+    },
+    getIcons: function() {
+        var icons = this.props.classes.map((c, index) => {
+            return (
+                <i key={index} className={"glyphicon " + c}></i>
+            );
+        });
+        
+        return icons;
     },
     render: function() {
-        var btnPosition = this.getClasses();
         return (
-            <button className={"btn btn-default " + btnPosition} style={{marginBottom: '5px'}}
-                    type="button" onClick={this.props.click}>
-                <span className={"glyphicon glyphicon-chevron-" + this.props.direction.toLowerCase()}></span>
+            <button className={"btn btn-default col-sm-" + this.props.width}
+                    style={{marginBottom: '5px'}}
+                    type="button"
+                    onClick={this.props.click}
+                    disabled={this.props.disable}>
+                {this.getIcons()}
             </button>
         );
     }

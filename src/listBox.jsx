@@ -1,17 +1,16 @@
 var React = require('react');
 var PropTypes = React.PropTypes;
-var ButtonComponent = require('./button.jsx');
-var ButtonAllComponent = require('./buttonAll.jsx');
+var ButtonComponent = require('button.jsx');
+var FilterBox = require('filterBox.jsx');
 
 var ListBox = React.createClass({
     displayName: 'ListBox',
     propTypes: {
         title: PropTypes.string.isRequired,
         source: PropTypes.arrayOf(PropTypes.object).isRequired,
-        moveAll: PropTypes.bool.isRequired,
+        moveAllBtn: PropTypes.bool.isRequired,
         onMove: PropTypes.func.isRequired,
         textLength: PropTypes.number,
-        onChange: PropTypes.func.isRequired,
         text: PropTypes.string.isRequired,
         value: PropTypes.string.isRequired,
         direction: PropTypes.string.isRequired
@@ -20,99 +19,133 @@ var ListBox = React.createClass({
         return {
             selected: [],
             filter: '',
-            filteredData: []
+            filteredData: [],
+            onClickDisabled: true,
+            onClickAllDisabled: true
         };
     },
-    onClickAll: function(event) {
-        this.props.onMove(this.state.filteredData);
+    componentWillMount: function() {
         this.setState({
-            selected: [],
-            filteredData: []
+            filteredData: this.props.source,
+            onClickAllDisabled: this.props.disable || this.props.source.length === 0
         });
+    },
+    componentWillReceiveProps: function(nextProps) {
+        if (this.props.source !== nextProps.source) {
+            var filteredData = this.filterData(this.state.filter, nextProps.source);
+            this.setState({
+                filteredData: filteredData,
+                onClickAllDisabled: this.props.disable || filteredData.length === 0,
+                selected: [],
+                onClickDisabled: true
+            });
+        }
+    },
+    onClickAll: function(event) {
+        this.deselectItems();
+        this.props.onMove(this.state.filteredData);
     },
     onClick: function(event) {
+        this.deselectItems();
         this.props.onMove(this.state.selected);
-        this.setState({
-            selected: []
-        });
+    },
+    deselectItems: function() {
+        for(var i = 0; i < this.state.selected.length; i++) {
+            this.refs.select.options[this.state.selected[i].optionId].selected = false;
+        }
     },
     handleFilterChange: function(event) {
-        var result = this.filteredData(event.target.value);
+        var filter = '';
+        if (this.filterBox !== null) {
+            filter = this.filterBox.refs.filter.input || event.target.value;
+        } else {
+            filter = event.target.value;
+        }
+
+        this.deselectItems();
+        var result = this.filterData(filter);
+
         this.setState({
-            filter: event.target.value,
-            filteredData: result
+            filter: filter,
+            filteredData: result,
+            selected: [],
+            onClickDisabled: true,
+            onClickAllDisabled: this.props.disable || result.length === 0
         });
     },
     handleSelectChange: function(event) {
-        var selectedValues = [];
-        for (var i = 0, l = event.target.options.length; i < l; i++) {
-            if (event.target.options[i].selected) {
-                selectedValues.push(event.target.options[i]);
+        var selectedValues = [], disable = this.props.disable;
+        var select = this.refs.select || event.target;
+
+        for (var i = 0, l = select.options.length; i < l; i++) {
+            if (select.options[i].selected) {
+                var itemValue = select.options[i].value;
+
+                var item = this.props.source.filter(v => v[this.props.value] == itemValue);
+                if (item.length > 0) {
+                    item[0].optionId = i;
+                    selectedValues.push(item[0]);
+                }
             }
         }
+
+        if (!disable && selectedValues.length === 0) {
+            disable = true;
+        }
+
         this.setState({
-            selected: selectedValues
+            selected: selectedValues,
+            onClickDisabled: disable
         });
-    },
-    disabled: function(sourceLength) {
-        return this.props.disable || sourceLength === 0;
     },
     buttons: function() {
         var btnNodes = [];
-        var btn = function(thisArg) {
+        var btn = function(thisArg, classes, func, key) {
             return (
                 <ButtonComponent
-                    key={'s-' + thisArg.props.direction}
-                    moveAll={thisArg.props.moveAll}
-                    click={thisArg.onClick}
-                    direction={thisArg.props.direction}
-                    disable={thisArg.disabled(thisArg.state.selected.length)} />
+                    key={key}
+                    click={thisArg[func]}
+                    width={thisArg.props.moveAllBtn ? 6 : 12}
+                    disable={thisArg.state[func + 'Disabled']} 
+                    classes={classes}/>
             );
         }
 
-        var btnAll = function(thisArg) {
-            return (
-                <ButtonAllComponent
-                    key={'a-' + thisArg.props.direction}
-                    click={thisArg.onClickAll}
-                    direction={thisArg.props.direction}
-                    disable={thisArg.disabled(thisArg.state.filteredData.length)} />
-            );
-        }
+        let chevron = `glyphicon-chevron-${this.props.direction.toLowerCase()}`;
 
         switch(this.props.direction.toLowerCase()) {
             case 'right':
-                if (this.props.moveAll === true) {
-                    btnNodes.push(btnAll(this));
+                if (this.props.moveAllBtn === true) {
+                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll', 1));
                 }
-                btnNodes.push(btn(this));
+                btnNodes.push(btn(this, [chevron], 'onClick', 2));
                 break;
             case 'left':
-                btnNodes.push(btn(this));
-                if (this.props.moveAll === true) {
-                    btnNodes.push(btnAll(this));
+                btnNodes.push(btn(this, [chevron], 'onClick', 3));
+                if (this.props.moveAllBtn === true) {
+                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll', 4));
                 }
                 break;
         }
 
         return btnNodes;
     },
-    filteredData: function(filter) {
+    filterData: function(filter, source) {
+        var source = source || this.props.source;
         if (filter === '' || filter === undefined) {
-            return this.props.source;
+            return source;
         }
 
-        var result = this.props.source.filter(function(v) { return v[this.props.text].indexOf(filter) > -1; }, this);
+        var result = source.filter(v => 
+            v[this.props.text].toLowerCase().indexOf(filter.toLowerCase()) > -1);
         return result;
     },
     render: function () {
-        var sourceData = this.state.filteredData.length > 0 ? this.state.filteredData : this.props.source; 
-
-        var items = sourceData.map(
-            function(item) {
+        var items = this.state.filteredData.map(
+            (item, index) => {
                 var text = item[this.props.text];
                 return (
-                    <option key={item[this.props.value]} value={item[this.props.value]}>
+                    <option key={index} value={item[this.props.value]}>
                         {
                              this.props.textLength > 0 && text.length > this.props.textLength ?
                                 text.substring(0, this.props.textLength - 3) + '...' :
@@ -123,12 +156,12 @@ var ListBox = React.createClass({
             }, this);
 
         return (
-            <div className="col-md-6">
-                <h4>{this.props.title}<small> - showing {sourceData.length}</small></h4>
-                <input style={{marginBottom: '5px'}} className="filter form-control"
-                       type="text" placeholder="Filter" onChange={this.handleFilterChange} />
+            <div className="col-sm-6">
+                <h4>{this.props.title}<small> - showing {this.state.filteredData.length}</small></h4>
+                <FilterBox handleFilterChange={this.handleFilterChange} ref={(ref) => this.filterBox = ref} />
                 {this.buttons()}
                 <select
+                    ref='select'
                     style={{width: '100%', height: (this.props.height || '200px')}}
                     multiple="multiple"
                     onChange={this.handleSelectChange}>
