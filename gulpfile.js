@@ -46,8 +46,29 @@ gulp.task('minify', function() {
         .pipe($.webpackBuild.run(_after));
 })
 
+gulp.task('serve', ['build', 'watch-script'], function () {
+    browserSync({
+        server: {
+            baseDir: ['app', 'dist', 'bower_components', 'tests', 'node_modules'],
+            index: 'index.html'
+        }
+    });
+
+    gulp.watch(['*.html', '**/*.js'], {cwd: 'app'}, reload);
+});
+
+gulp.task('build', function () {
+    return gulp.src('app/src/script.js')
+        .pipe($.babel())
+        .pipe(gulp.dest('app/'));
+});
+
 gulp.task('script', function () {
     return _buildTask(false);
+});
+
+gulp.task("watch-script", function() {
+	return _buildTask(true);
 });
 
 function _buildTask(watch) {

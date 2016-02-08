@@ -10,7 +10,7 @@ var DualListBox = require('../src/dualListBox.jsx');
 describe('DualListBox:', () => {
     var sourceLength, destinationLength,
         sourceData, destinationData, itemIds,
-        renderer, moveLeft, moveRight;
+        renderer;
 
     beforeEach(() => {
         sourceLength = 3000;
