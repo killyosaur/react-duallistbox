@@ -1,6 +1,6 @@
 {
   "name": "react-duallistbox",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "a dual list box for selecting and moving data using react",
   "main": "index.js",
   "directories": {
@@ -51,7 +51,6 @@
     "karma-coverage": "^0.5.3",
     "karma-jasmine": "^0.3.6",
     "karma-phantomjs-launcher": "^0.2.3",
-    "karma-phantomjs2-launcher": "^0.4.0",
     "karma-sourcemap-loader": "^0.3.7",
     "karma-webpack": "^1.7.0",
     "moment": "^2.11.1",

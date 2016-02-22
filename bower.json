@@ -31,7 +31,8 @@
     ".babelrc",
     ".gitignore",
     "karma.conf.js",
-    "package.json"
+    "package.json",
+    "app"
   ],
   "dependencies": {
     "react": "~0.14.7",

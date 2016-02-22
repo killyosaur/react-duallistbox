@@ -1,6 +1,6 @@
 /*!
  * react-duallistbox - a dual list box for selecting and moving data using react
- * @version v0.1.0
+ * @version v0.2.0
  * @link https://github.com/killyosaur/react-duallistbox#readme
  * @license CC-BY-SA-4.0
  */
@@ -154,26 +154,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    moveLeft: function moveLeft(itemsToMove) {
 	        var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
 	        var destination = this.removeData(this.state.destinationData, itemsToMove);
+
+	        if (this.props.onChange) {
+	            this.props.onChange(destination, this.state.destinationData);
+	        }
+
 	        this.setState({
 	            sourceData: source,
 	            destinationData: destination
 	        });
-
-	        if (this.props.onChange) {
-	            this.props.onChange(destination);
-	        }
 	    },
 	    moveRight: function moveRight(itemsToMove) {
 	        var source = this.removeData(this.state.sourceData, itemsToMove);
 	        var destination = this.state.destinationData.concat(itemsToMove).sort(this.compare);
+
+	        if (this.props.onChange) {
+	            this.props.onChange(destination, this.state.destinationData);
+	        }
+
 	        this.setState({
 	            sourceData: source,
 	            destinationData: destination
 	        });
-
-	        if (this.props.onChange) {
-	            this.props.onChange(destination);
-	        }
 	    },
 	    render: function render() {
 	        return React.createElement(

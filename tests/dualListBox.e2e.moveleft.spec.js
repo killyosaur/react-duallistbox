@@ -61,7 +61,7 @@ describe('E2E DualListBox: move left', () => {
             expect(source.options.length).toBe(sourceLength);
             expect(destination.options.length).toBe(0);
             expect(dualListBox.state.sourceData.length).toBe(sourceLength);
-            expect(onChange).toHaveBeenCalledWith([]);
+            expect(onChange).toHaveBeenCalledWith([], destinationData);
             expect(dualListBox.state.destinationData.length).toBe(0);
         });
 

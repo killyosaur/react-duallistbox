@@ -15,7 +15,7 @@ describe('E2E DualListBox: move right', () => {
     var sort = (a, b) => a.id === b.id ? 0 : a.id < b.id ? -1 : 1;
 
     beforeEach(() => {
-        sourceLength = 3000;
+        sourceLength = 300;
 
         sourceData = JSC.array(sourceLength, JSC.object({
             name: JSC.one_of(pickOne()),
@@ -48,7 +48,7 @@ describe('E2E DualListBox: move right', () => {
             expect(source.options.length).toBe(0);
             expect(destination.options.length).toBe(sourceLength);
             expect(dualListBox.state.sourceData.length).toBe(0);
-            expect(onChange).toHaveBeenCalledWith(sourceData);
+            expect(onChange).toHaveBeenCalledWith(sourceData, []);
             expect(dualListBox.state.destinationData.length).toBe(sourceLength);
         });
 
@@ -76,7 +76,7 @@ describe('E2E DualListBox: move right', () => {
 
         it('should call onChange after moving data with data in destination', () => {
             destinationData = [];
-            destinationLength = 100;
+            destinationLength = 10;
             var indices = JSC.array(destinationLength, JSC.integer(0, sourceData.length - 1))();
 
             for (var i = 0; i < destinationLength; i++) {
@@ -118,7 +118,7 @@ describe('E2E DualListBox: move right', () => {
             expect(dualListBox.state.sourceData.length).toBe(sourceLength - expected.length);
             expect(dualListBox.state.destinationData.length).toBe(expected.length);
             expect(dualListBox.state.destinationData).toEqual(expected.sort(sort));
-            expect(onChange).toHaveBeenCalledWith(expected);
+            expect(onChange).toHaveBeenCalledWith(expected, destinationData);
             expect(buttonToClick.getAttribute('disabled')).toBe('');
         });
     });

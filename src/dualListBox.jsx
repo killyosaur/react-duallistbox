@@ -92,26 +92,28 @@ var DualListBox = React.createClass({
     moveLeft: function(itemsToMove) {
         var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
         var destination = this.removeData(this.state.destinationData, itemsToMove);
+
+        if(this.props.onChange) {
+            this.props.onChange(destination, this.state.destinationData);
+        }
+
         this.setState({
             sourceData: source,
             destinationData: destination
         });
-
-        if(this.props.onChange) {
-            this.props.onChange(destination);
-        }
     },
     moveRight: function(itemsToMove) {
         var source = this.removeData(this.state.sourceData, itemsToMove);
         var destination = this.state.destinationData.concat(itemsToMove).sort(this.compare);
+
+        if(this.props.onChange) {
+            this.props.onChange(destination, this.state.destinationData);
+        }
+
         this.setState({
             sourceData: source,
             destinationData: destination
         });
-
-        if(this.props.onChange) {
-            this.props.onChange(destination);
-        }
     },
     render: function() {
         return (
