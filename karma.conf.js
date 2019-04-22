@@ -3,7 +3,7 @@
 var webpack = require('webpack');
 var path = require('path');
 var singleRun = true;
-var browsers = ['Chrome'];
+var browsers = ['ChromeHeadless'];
 var logLevel = 'LOG_INFO';
 var postLoaders = [
     {
@@ -36,7 +36,6 @@ module.exports = function(config) {
 
     plugins: [
         'karma-chrome-launcher',
-        'karma-phantomjs-launcher',
         'karma-jasmine',
         'karma-sourcemap-loader',
         'karma-webpack',
