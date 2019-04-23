@@ -1,7 +1,7 @@
-var React = require('react');
-var PropTypes = React.PropTypes;
+import React from 'react';
+import PropTypes from 'prop-types';
 
-var FilterBox = React.createClass({
+const FilterBox = React.createClass({
    displayName: 'FilterBox',
     propTypes: {
         handleFilterChange: PropTypes.func.isRequired
@@ -14,4 +14,4 @@ var FilterBox = React.createClass({
     }
 });
 
-module.exports = FilterBox;
+export {FilterBox};

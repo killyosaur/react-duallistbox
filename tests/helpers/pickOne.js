@@ -1,4 +1,4 @@
-var pickOne = function() {
+const pickOne = function() {
     var games = ["Chess","Cross and Circle game","DaldÃ¸s","Downfall","DVONN","Fanorona","Game of the Generals","Ghosts",
         "Abalone","Agon","Backgammon","Battleship","Blockade","Blood Bowl","Bul","Camelot","Checkers",
         "Go","Gipf","Guess Who?","Hare and Hounds","Hex","Hijara","Isola","Janggi (Korean Chess)","Le Jeu de la Guerre",
@@ -32,3 +32,5 @@ var pickOne = function() {
     }
     return data;
 };
+
+export {pickOne};

@@ -1,8 +1,8 @@
-var React = require('react');
-var PropTypes = React.PropTypes;
-var ListBox = require('listBox.jsx');
+import React from 'react';
+import PropTypes from 'prop-types';
+import {ListBox} from './listBox';
 
-var DualListBox = React.createClass({
+const DualListBox = React.createClass({
     displayName: 'DualListBox',
     propTypes: {
         text: PropTypes.string.isRequired,
@@ -145,4 +145,4 @@ var DualListBox = React.createClass({
     }
 });
 
-module.exports = DualListBox;
+export {DualListBox};

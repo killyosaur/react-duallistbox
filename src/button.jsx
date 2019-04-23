@@ -1,7 +1,7 @@
-var React = require('react');
-var PropTypes = React.PropTypes;
+import React from 'react';
+import PropTypes from 'prop-types';
 
-var ButtonComponent = React.createClass({
+const ButtonComponent = React.createClass({
     displayName: 'ButtonComponent',
     propTypes: {
         classes: PropTypes.arrayOf(PropTypes.string).isRequired,
@@ -39,4 +39,4 @@ var ButtonComponent = React.createClass({
     }
 });
 
-module.exports = ButtonComponent;
+export {ButtonComponent};

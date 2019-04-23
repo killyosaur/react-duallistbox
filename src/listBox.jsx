@@ -1,9 +1,9 @@
-var React = require('react');
-var PropTypes = React.PropTypes;
-var ButtonComponent = require('button.jsx');
-var FilterBox = require('filterBox.jsx');
+import React from 'react';
+import PropTypes from 'prop-types';
+import {ButtonComponent} from './button';
+import {FilterBox} from './filterBox';
 
-var ListBox = React.createClass({
+const ListBox = React.createClass({
     displayName: 'ListBox',
     propTypes: {
         title: PropTypes.string.isRequired,
@@ -172,4 +172,4 @@ var ListBox = React.createClass({
     }
 });
 
-module.exports = ListBox;
+export {ListBox};

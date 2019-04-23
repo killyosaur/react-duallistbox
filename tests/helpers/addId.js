@@ -1,4 +1,4 @@
-var addId = function(items, idProp) {
+const addId = function(items, idProp) {
     if (!idProp) {
         idProp = 'id';
     }
@@ -12,3 +12,5 @@ var addId = function(items, idProp) {
 
     return ids;
 };
+
+export {addId};

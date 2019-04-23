@@ -1,6 +1,7 @@
-import React from '../../bower_components/react/react.js'
-import ReactDOM from '../../bower_components/react/react-dom.js'
-import DualListBox from '../../dist/react-duallistbox.js'
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { DualListBox } from '../../src'
+import {addId, pickOne} from '../../tests/helpers'
 import JSC from 'jscheck'
 
 let getData = () => {
