@@ -2,9 +2,70 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {ListBox} from './listBox';
 
-const DualListBox = React.createClass({
-    displayName: 'DualListBox',
-    propTypes: {
+const compare = (sortBy) => {
+    return (a, b) => {
+        if(typeof a[sortBy] === 'string' && 
+            typeof b[sortBy] === 'string')
+        {
+            return a[sortBy].localeCompare(b[sortBy])
+        }
+
+        return a[sortBy] === b[sortBy] ? 0 : 
+            a[sortBy] > b[sortBy] ? 1 : -1;
+    };
+};
+
+const valueEquals = (v1, v2) => {
+    if (Array.isArray(v1) && Array.isArray(v2)) {
+        return arrayEquals(v1, v2);
+    }
+
+    if(typeof v1 === "object" && typeof v2 === "object") {
+        return objEquals(v1, v2);
+    }
+
+    return v1 === v2;
+};
+
+const arrayEquals = (arr1, arr2) => {
+    if(arr1.length !== arr2.length) {
+        return false;
+    }
+
+    for(let i = 0; i < arr1.length; i++) {
+        const v1 = arr1[i];
+        const v2 = arr2[i];
+
+        if(!valueEquals(v1, v2)) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+const objEquals = (obj1, obj2) => {
+    var props1 = Object.keys(obj1);
+    var props2 = Object.keys(obj2);
+
+    if (!arrayEquals(props1, props2)) {
+        return false;
+    }
+
+    for(let i = 0; i < props1.length; i++) {
+        const v1 = obj1[props1[i]];
+        const v2 = obj2[props2[i]];
+
+        if(!valueEquals(v1, v2)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+class DualListBox extends React.Component {
+    static propTypes = {
         text: PropTypes.string.isRequired,
         value: PropTypes.string.isRequired,
         sourceTitle: PropTypes.string,
@@ -18,45 +79,47 @@ const DualListBox = React.createClass({
         source: PropTypes.arrayOf(PropTypes.object).isRequired,
         destination: PropTypes.arrayOf(PropTypes.object).isRequired,
         onChange: PropTypes.func
-    },
-    getInitialState: function() {
-        return {
-            sourceData: [],
-            destinationData: []
-        };
-    },
-    getDefaultProps: function() {
-        return {
-            text: 'name',                       // Text that is assigned to the option field.
-            value: 'id',                        // Optional Value field, will create a standard list box by value.
-            sourceTitle: 'Available Items',     // Title of the source list of the dual list box.
-            destinationTitle: 'Selected Items', // Title of the destination list of the dual list box.
-            timeout: 500,                       // Timeout for when a filter search is started.
-            textLength: 45,                     // Maximum text length that is displayed in the select.
-            moveAllBtn: true,                   // Whether the append all button is available.
-            maxAllBtn: 500,                     // Maximum size of list in which the all button works without warning. See below.
-            height: '300px',
-            sortBy: 'name',
-            warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
-        };
-    },
-    componentWillMount: function() {
-        var sourceData = this.removeData(this.props.source, this.props.destination).sort(this.compare);
+    }
 
-        this.setState({
-            sourceData: sourceData,
-            destinationData: this.props.destination.sort(this.compare)
-        });
-    },
-    componentWillReceiveProps: function(nextProps) {
-        var sourceData = this.removeData(nextProps.source, nextProps.destination).sort(this.compare);
+    static defaultProps = {
+        text: 'name',                       // Text that is assigned to the option field.
+        value: 'id',                        // Optional Value field, will create a standard list box by value.
+        sourceTitle: 'Available Items',     // Title of the source list of the dual list box.
+        destinationTitle: 'Selected Items', // Title of the destination list of the dual list box.
+        timeout: 500,                       // Timeout for when a filter search is started.
+        textLength: 45,                     // Maximum text length that is displayed in the select.
+        moveAllBtn: true,                   // Whether the append all button is available.
+        maxAllBtn: 500,                     // Maximum size of list in which the all button works without warning. See below.
+        height: '300px',
+        sortBy: 'name',
+        warning: 'Are you sure you want to move this many items? Doing so can cause your browser to become unresponsive.'
+    }
 
-        this.setState({
-            sourceData: sourceData,
-            destinationData: nextProps.destination.sort(this.compare)
-        });
-    },
-    removeData: function(destinationData, dataToRemove) {
+    state = {
+        sourceData: [],
+        destinationData: []
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        let destinationData = nextProps.destination.sort(compare(nextProps.sortBy));
+        if(!arrayEquals(prevState.destinationData, destinationData)) {
+            return { destinationData };
+        }
+
+        return null;
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        let sourceData = this.removeData(prevProps.source, prevProps.destination).sort(compare(this.props.sortBy));
+
+        if(!arrayEquals(prevState.sourceData, sourceData)) {
+            this.setState({
+                sourceData: sourceData
+            });
+        }
+    }
+
+    removeData = (destinationData, dataToRemove) => {
         var dataToReturn = [];
         for (var x = 0; x < destinationData.length; x++) {
             var index = this.getIndex(dataToRemove, destinationData[x]);
@@ -66,8 +129,9 @@ const DualListBox = React.createClass({
         }
 
         return dataToReturn;
-    },
-    getIndex: function(data, item) {
+    }
+
+    getIndex = (data, item) => {
         var ind = 0, length = data.length;
         if (!data || data.length === 0) return -1;
 
@@ -78,19 +142,10 @@ const DualListBox = React.createClass({
         }
 
         return -1;
-    },
-    compare: function(a, b) {
-        if(typeof a[this.props.sortBy] === 'string' && 
-            typeof b[this.props.sortBy] === 'string')
-        {
-            return a[this.props.sortBy].localeCompare(b[this.props.sortBy])
-        }
-
-        return a[this.props.sortBy] === b[this.props.sortBy] ? 0 : 
-            a[this.props.sortBy] > b[this.props.sortBy] ? 1 : -1;
-    },
-    moveLeft: function(itemsToMove) {
-        var source = this.state.sourceData.concat(itemsToMove).sort(this.compare);
+    }
+    
+    moveLeft = (itemsToMove) => {
+        var source = this.state.sourceData.concat(itemsToMove).sort(compare(this.props.sortBy));
         var destination = this.removeData(this.state.destinationData, itemsToMove);
         this.setState({
             sourceData: source,
@@ -100,10 +155,11 @@ const DualListBox = React.createClass({
         if(this.props.onChange) {
             this.props.onChange(destination);
         }
-    },
-    moveRight: function(itemsToMove) {
+    }
+
+    moveRight = (itemsToMove) => {
         var source = this.removeData(this.state.sourceData, itemsToMove);
-        var destination = this.state.destinationData.concat(itemsToMove).sort(this.compare);
+        var destination = this.state.destinationData.concat(itemsToMove).sort(compare(this.props.sortBy));
         this.setState({
             sourceData: source,
             destinationData: destination
@@ -112,8 +168,9 @@ const DualListBox = React.createClass({
         if(this.props.onChange) {
             this.props.onChange(destination);
         }
-    },
-    render: function() {
+    }
+
+    render() {
         return (
             <div className="form-group row">
                 <ListBox 
@@ -143,6 +200,6 @@ const DualListBox = React.createClass({
             </div>
         );
     }
-});
+}
 
 export {DualListBox};
