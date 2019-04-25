@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {ButtonComponent} from './button';
 import {FilterBox} from './filterBox';
+import './button.styles.css';
 
 class ListBox extends React.Component {
     static propTypes = {
@@ -12,7 +13,9 @@ class ListBox extends React.Component {
         textLength: PropTypes.number,
         text: PropTypes.string.isRequired,
         value: PropTypes.string.isRequired,
-        direction: PropTypes.string.isRequired
+        direction: PropTypes.string.isRequired,
+        moveAllIconOverride: PropTypes.arrayOf(PropTypes.string),
+        moveSelectedIconOverride: PropTypes.arrayOf(PropTypes.string)
     }
 
     static defaultProps = {
@@ -20,7 +23,9 @@ class ListBox extends React.Component {
         filter: '',
         filteredData: [],
         onClickDisabled: true,
-        onClickAllDisabled: true
+        onClickAllDisabled: true,
+        moveAllIconOverride: null,
+        moveSelectedIconOverride: null
     }
 
     state = {
@@ -65,19 +70,20 @@ class ListBox extends React.Component {
             );
         }
 
-        let chevron = `glyphicon-chevron-${this.props.direction.toLowerCase()}`;
+        var classesAll = this.props.moveAllIconOverride || [`duallistbox-icon duallistbox-icon-all-${this.props.direction}`];
+        var classes = this.props.moveAllIconOverride || [`duallistbox-icon duallistbox-icon-${this.props.direction}`];
 
         switch(this.props.direction.toLowerCase()) {
             case 'right':
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btn(this, ['glyphicon-list', chevron], 'onClickAll', 1));
+                    btnNodes.push(btn(this, classesAll, 'onClickAll', 1));
                 }
-                btnNodes.push(btn(this, [chevron], 'onClick', 2));
+                btnNodes.push(btn(this, classes, 'onClick', 2));
                 break;
             case 'left':
-                btnNodes.push(btn(this, [chevron], 'onClick', 3));
+                btnNodes.push(btn(this, classes, 'onClick', 3));
                 if (this.props.moveAllBtn === true) {
-                    btnNodes.push(btn(this, [chevron, 'glyphicon-list'], 'onClickAll', 4));
+                    btnNodes.push(btn(this, classesAll, 'onClickAll', 4));
                 }
                 break;
         }
